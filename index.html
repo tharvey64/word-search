@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Word Search</title>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
+    <script src="base.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="base.css">
+  </head>
+
+  <body>
+    <div class="container">
+      
+      <div id="createGame">
+        <form id="createGameForm" action="/create">
+          <h3>Create Game</h3>
+          <p>Select your opponents.</p>
+          <select id="userList" multiple></select>
+          <input type="submit" value="Submit">
+        </form>
+      </div>
+
+      <div id="chat">
+        <ul id="messages"></ul>
+        <form id="messageForm" action="">
+          <input id="m" autocomplete="off"><button>Send</button>
+        </form>
+      </div>
+
+    </div>
+  </body>
+  <script id="gameInviteTemplate" type="x-tmpl-mustache">
+    <form id="gameInvitationForm" action="">
+      <input type="hidden" name="gameNumber" value={{ gameId }}>
+      <input type="submit" value="Join">
+    </form>
+  </script>
+</html>
