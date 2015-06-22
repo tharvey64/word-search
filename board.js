@@ -2,7 +2,7 @@
 // Search is not as fast as i would like
 // Incorporate This Into The Rest of the App 
 function Board(){
-    this.alphabet = ["A","A","A","B","B","C","C","D","D","E","E","E","E","F","F","G","G","H","H","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","P","P","Q","R","S","T","U","U","V","W","X","Y","Z"];
+    this.alphabet = ["A","A","A","B","B","C","C","D","D","E","E","E","E","F","F","G","G","H","H","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","P","P","Q","R","R","S","S","T","T","U","U","V","W","X","Y","Y","Z"];
     this.answers = [];
     this.letters;
     this.letterIndex = {};
