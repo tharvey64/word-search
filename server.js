@@ -1,35 +1,12 @@
 var express = require('express'),
 app = express(),
 http = require('http').Server(app),
-io = require('socket.io')(http);
-var test = require('./models/board.js');
+io = require('socket.io')(http),
+socketManagement = require('user_sockets');
 
-
-var game = new test.Board();
-game.populate();
-var search = new test.Search(game);
+// Delete most of this stuff
 
 app.use(express.static('public'));
-
-app.get('/', function(req, res){
-	res.sendFile(__dirname + '/index.html');
-});
-
-app.get('/board', function(req, res){
-	res.sendFile(__dirname + '/board.html');
-});
-
-app.get('/letters', function(req, res){
-	var alpha = ["A","A","B","C","D","E","E","F","G","H","I","I","J","K","L","M","N","O","O","P","Q","R","S","T","U","U","V","W","X","Y","Z"];
-	letters = [];
-	for (i = 0; i < 15; i++){
-		letters.push([]);
-		for(j = 0; j < 15; j++){
-			letters[i].push(alpha[Math.floor(Math.random()*alpha.length)])
-		}
-	}
-	res.send({'board': letters});
-});
 
 var connected = {};
 var games = 0;
