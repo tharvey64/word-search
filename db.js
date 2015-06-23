@@ -1,29 +1,23 @@
-var mongo = require("mongodb");
+var mongo = require('mongodb').MongoClient,
+db, 
+connected = false;
 
-var state = {
-    db: null,
-}
+exports.connect = function(url, callback) {
+    if (connected) return callback(db);
 
-exports.connect = function(url, done) {
-    if (state.db) return done();
-
-    mongo.connect(url, function(err, db){
-        if (err) return done(err);
-        state.db = db;
-        done();
+    mongo.connect(url, function(err, _db){
+        if (err){
+            throw new Error('Could not connect: '+err)
+        }
+        db = _db;
+        connected = true;
+        callback(db);
     });
 }
 
-exports.get = function() {
-    return state.db;
-}
-
-exports.close = function(done){
-    if (state.db){
-        state.db.close(function(err,result){
-            state.db = null;
-            state.mode = null;
-            done(err);
-        });
+exports.collection = function(name) {
+    if (!connected){
+        throw new Error('Must connect to Mongo before calling "collection".')
     }
+    return db.collection(name);
 }

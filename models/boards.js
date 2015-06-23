@@ -1,18 +1,38 @@
-// Search and Board Work
-// Search is not as fast as i would like
-// Incorporate This Into The Rest of the App 
+var db = require("../db");
+
+exports.getGame = function(cb){
+    var collection = db.collection("games");
+    collection.find().toArray(function(err,docs){
+        cb(err, docs);
+    });
+}
+
+// exports.createGame = function(callback){
+
+// }
+
+// Games need players and current turn
+// Create Game Class
+// Game rules go in the Game class
+// Game holds its unique game id
+
 function Board(){
+    // Might Not Go in DB
     this.alphabet = ["A","A","A","B","B","C","C","D","D","E","E","E","E","F","F","G","G","H","H","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","P","P","Q","R","R","S","S","T","T","U","U","V","W","X","Y","Y","Z"];
+    // DB Field
+    // Change This to a Dictionary
     this.answers = [];
+    // DB Field
     this.letters;
+    // DB Field
     this.letterIndex = {};
 }
-Board.prototype.populate = function(){
+Board.prototype.populate = function(characterSet){
     this.letters = [];
     for (i = 0; i < 15; i++){
         this.letters.push([]);
         for(j = 0; j < 15; j++){
-            var newLetter = this.alphabet[Math.floor(Math.random()*this.alphabet.length)];
+            var newLetter = characterSet[Math.floor(Math.random()*characterSet.length)];
             if (!this.letterIndex.hasOwnProperty(newLetter)){
                 this.letterIndex[newLetter] = [];
             }
@@ -36,7 +56,6 @@ Search.prototype.checkFirstLetter = function(word){
 }
 Search.prototype.checkSurround = function(cooordinate, word){
     var startObj = this.board.letters[cooordinate[0]][cooordinate[1]];
-    // Begin to check surrounding letters
     var numberOfColumns = this.board.letters[0].length;
     var numberOfRows = this.board.letters.length;
     var restOfWord = word.length - 1;
@@ -84,53 +103,55 @@ Search.prototype.checkSurround = function(cooordinate, word){
     }
 }
 
-module.exports = {
-    "Board" : Board,
-    "Search": Search
-}
-// TESTS Should Replace This
-game = new Board();
-// console.log(game.alphabet);
-// console.log(game.letters);
-// console.log(game.letterIndex);
-// console.log(game.answers);
-game.populate();
-// console.log(game.letters);
-// console.log(game.letterIndex);
-// console.log(game.letters.length);
-// console.log(game.letters[0].length);
-// for (i = 0; i < game.letters.length; i++){
-//     var line = [];
-//     for (j = 0; j < game.letters[0].length; j++){
-//         line.push(game.letters[i][j]['letter']);
-//     }
-//     console.log(line.join("-"));
-// }
-// game.populate();
-// console.log();
-// for (i = 0; i < game.letters.length; i++){
-//     var line = [];
-//     for (j = 0; j < game.letters[0].length; j++){
-//         line.push(game.letters[i][j]['letter']);
-//     }
-//     console.log(line.join("-"));
-// }
-// Search Speed Needs to be increased
-searchBoard = new Search(game);
-lineReader = require('line-reader');
+// This should export a game not The Board or Search
+exports.board = Board;
+exports.search = Search;
 
-lineReader.eachLine('dictionary.txt', function(line) {
-    if (line.length > 3){
-        searchBoard.checkFirstLetter(line.toUpperCase());
-    }
-}).then(function(){
-    for (i = 0; i < game.letters.length; i++){
-        var line = [];
-    for (j = 0; j < game.letters[0].length; j++){
-        line.push(game.letters[i][j]['letter']);
-    }
-    console.log(line.join("-"));
-}
+
+if(!module.parent){
+    // TESTS Should Replace This
+    game = new Board();
+    console.log(game.alphabet);
+    console.log(game.letters);
+    console.log(game.letterIndex);
     console.log(game.answers);
-    console.log("Done");
-});
+    game.populate();
+    console.log(game.letters);
+    console.log(game.letterIndex);
+    console.log(game.letters.length);
+    console.log(game.letters[0].length);
+    // for (i = 0; i < game.letters.length; i++){
+    //     var line = [];
+    //     for (j = 0; j < game.letters[0].length; j++){
+    //         line.push(game.letters[i][j]['letter']);
+    //     }
+    //     console.log(line.join("-"));
+    // }
+    // game.populate();
+    // console.log();
+    // for (i = 0; i < game.letters.length; i++){
+    //     var line = [];
+    //     for (j = 0; j < game.letters[0].length; j++){
+    //         line.push(game.letters[i][j]['letter']);
+    //     }
+    //     console.log(line.join("-"));
+    // }
+    // Search Speed Needs to be increased
+    searchBoard = new Search(game);
+    lineReader = require('line-reader');
+
+    lineReader.eachLine('dictionary.txt', function(line) {
+        if (line.length > 3){
+            searchBoard.checkFirstLetter(line.toUpperCase());
+        }
+    }).then(function(){
+        for (i = 0; i < game.letters.length; i++){
+            var line = [];
+        for (j = 0; j < game.letters[0].length; j++){
+            line.push(game.letters[i][j]['letter']);
+        }
+        console.log(line.join("-"));
+    }
+        console.log(game.answers);
+    });
+}
