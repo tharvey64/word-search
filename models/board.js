@@ -1,6 +1,3 @@
-// Search and Board Work
-// Search is not as fast as i would like
-// Incorporate This Into The Rest of the App 
 function Board(){
     this.alphabet = ["A","A","A","B","B","C","C","D","D","E","E","E","E","F","F","G","G","H","H","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","P","P","Q","R","R","S","S","T","T","U","U","V","W","X","Y","Y","Z"];
     this.answers = [];
@@ -36,7 +33,6 @@ Search.prototype.checkFirstLetter = function(word){
 }
 Search.prototype.checkSurround = function(cooordinate, word){
     var startObj = this.board.letters[cooordinate[0]][cooordinate[1]];
-    // Begin to check surrounding letters
     var numberOfColumns = this.board.letters[0].length;
     var numberOfRows = this.board.letters.length;
     var restOfWord = word.length - 1;
