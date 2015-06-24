@@ -1,7 +1,7 @@
 var express = require("express"),
 router = express.Router();
 
-var Words = require("../models/words");
+var Words = require("../../models/words");
 // If the board has all the letters of the 
 // alphabet get all the words
 router.get("/all", function(req, res){

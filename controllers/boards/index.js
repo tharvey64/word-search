@@ -1,7 +1,8 @@
 var express = require("express"),
-router = express.Router();
+router = express.Router(),
+path = require('path');
 
-var Boards = require("../models/boards");
+var Boards = require("../../models/boards");
 
 // Need to think About these routes more
 // These should be game centric routes not
@@ -9,23 +10,28 @@ var Boards = require("../models/boards");
 // Create the Game Class
 
 router.get('/board', function(req, res){
-    res.sendFile(__dirname + '/board.html');
+    res.sendFile(path.join(__dirname ,'../../public/','board.html'));
 });
 
 router.get('/letters', function(req, res){
-    res.send({'board': letters});
-});
-
-router.get("/load/:game_id", function(req, res){
-    Boards.loadGame(function(err, docs){
-        res.render("boards", {boards: docs});
+    Boards.createBoard(function(letters){
+        res.send({'board': letters});
     });
 });
 
-router.get("/create", function(req, res){
-    Boards.createGame(function(err, docs){
-        res.render("boards", {boards: docs});
-    });
-});
+// NOT ACTIVE
+// router.get("/load/:game_id", function(req, res){
+//     res.send({'route':'/load'});
+//     // Boards.loadGame(function(err, docs){
+//     //     res.render("boards", {boards: docs});
+//     // });
+// });
+
+// router.get("/create", function(req, res){
+//     res.send({'route':'/create'});
+//     // Boards.createGame(function(err, docs){
+//     //     res.render("boards", {boards: docs});
+//     // });
+// });
 
 module.exports = router;

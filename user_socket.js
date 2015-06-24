@@ -1,5 +1,4 @@
 var connected = {};
-var games = 0;
 
 exports.live = function(tempIO){
     tempIO.on('connection', function(socket){
@@ -25,10 +24,13 @@ exports.live = function(tempIO){
         });
 
         socket.on('join game', function(gameId){
+            console.log(gameId);
+            socket.join(gameId);
             socket.to(gameId).emit('chat message', name + " Joined Game");
         });
 
         socket.on('start game', function(board, gameId){
+            console.log(gameId);
             tempIO.to(gameId).emit('start game', board);
         });
 

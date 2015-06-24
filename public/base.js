@@ -1,8 +1,8 @@
 function buildBoard(gameId){
-	$.get('/board', function(data){
+	$.get('/game/board', function(data){
 		var template = data;
 		Mustache.parse(template);
-		$.get('/letters', function(data){
+		$.get('/game/letters', function(data){
 			var board = Mustache.render(template, data);
 			socket.emit('start game', board, gameId);
 		});
@@ -71,10 +71,11 @@ $(document).ready(function(){
 
 	$('#createGame').on('click', '#startGame',function(){
 		var gameId = sessionId + String(games);
-		$.get('/board', function(data){
+		
+		$.get('/game/board', function(data){
 			var template = data;
 			Mustache.parse(template);
-			$.get('/letters', function(data){
+			$.get('/game/letters', function(data){
 				var board = Mustache.render(template, data);
 				socket.emit('start game', board, gameId);
 			});
