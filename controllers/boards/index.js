@@ -9,23 +9,26 @@ var Boards = require("../models/boards");
 // Create the Game Class
 
 router.get('/board', function(req, res){
-    res.sendFile(__dirname + '/board.html');
+    res.send({'route':'/board'});
+    // res.sendFile(__dirname + '/board.html');
 });
 
 router.get('/letters', function(req, res){
-    res.send({'board': letters});
+    res.send({'route':'/letters'});
 });
 
 router.get("/load/:game_id", function(req, res){
-    Boards.loadGame(function(err, docs){
-        res.render("boards", {boards: docs});
-    });
+    res.send({'route':'/load'});
+    // Boards.loadGame(function(err, docs){
+    //     res.render("boards", {boards: docs});
+    // });
 });
 
 router.get("/create", function(req, res){
-    Boards.createGame(function(err, docs){
-        res.render("boards", {boards: docs});
-    });
+    res.send({'route':'/create'});
+    // Boards.createGame(function(err, docs){
+    //     res.render("boards", {boards: docs});
+    // });
 });
 
 module.exports = router;
