@@ -28,6 +28,10 @@ function Board(){
     this.letterIndex = {};
 }
 Board.prototype.populate = function(characterSet){
+    console.log(arguments.length);
+    if (!characterSet){
+        characterSet = this.alphabet;
+    }
     this.letters = [];
     for (i = 0; i < 15; i++){
         this.letters.push([]);
@@ -104,13 +108,20 @@ Search.prototype.checkSurround = function(cooordinate, word){
 }
 
 // This should export a game not The Board or Search
-exports.board = Board;
-exports.search = Search;
+// exports.board = Board;
+// exports.search = Search;
+var currentBoard;
+
+exports.createBoard = function(cb){
+    var currentBoard = new Board();
+    currentBoard.populate();
+    cb(currentBoard.letters);
+}
 
 
 if(!module.parent){
     // TESTS Should Replace This
-    game = new Board();
+    var game = new Board();
     console.log(game.alphabet);
     console.log(game.letters);
     console.log(game.letterIndex);
@@ -120,25 +131,9 @@ if(!module.parent){
     console.log(game.letterIndex);
     console.log(game.letters.length);
     console.log(game.letters[0].length);
-    // for (i = 0; i < game.letters.length; i++){
-    //     var line = [];
-    //     for (j = 0; j < game.letters[0].length; j++){
-    //         line.push(game.letters[i][j]['letter']);
-    //     }
-    //     console.log(line.join("-"));
-    // }
-    // game.populate();
-    // console.log();
-    // for (i = 0; i < game.letters.length; i++){
-    //     var line = [];
-    //     for (j = 0; j < game.letters[0].length; j++){
-    //         line.push(game.letters[i][j]['letter']);
-    //     }
-    //     console.log(line.join("-"));
-    // }
     // Search Speed Needs to be increased
-    searchBoard = new Search(game);
-    lineReader = require('line-reader');
+    var searchBoard = new Search(game);
+    var lineReader = require('line-reader');
 
     lineReader.eachLine('dictionary.txt', function(line) {
         if (line.length > 3){
@@ -146,12 +141,12 @@ if(!module.parent){
         }
     }).then(function(){
         for (i = 0; i < game.letters.length; i++){
-            var line = [];
-        for (j = 0; j < game.letters[0].length; j++){
-            line.push(game.letters[i][j]['letter']);
+            var row = [];
+            for (j = 0; j < game.letters[0].length; j++){
+                row.push(game.letters[i][j]['letter']);
+            }
+            console.log(row.join("-"));
         }
-        console.log(line.join("-"));
-    }
         console.log(game.answers);
     });
 }
