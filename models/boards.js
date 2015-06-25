@@ -1,12 +1,3 @@
-var db = require("../db");
-
-exports.getGame = function(cb){
-    var collection = db.collection("games");
-    collection.find().toArray(function(err,docs){
-        cb(err, docs);
-    });
-}
-
 // exports.createGame = function(callback){
 
 // }
@@ -16,19 +7,66 @@ exports.getGame = function(cb){
 // Game rules go in the Game class
 // Game holds its unique game id
 
+// i might have to index each word
+function Game(){
+    this.gameKey;
+    this.players = [];
+    this.letters;
+    this.foundWords = [];
+    this.consecutivePasses = 0;
+    this.checkGuess;
+}
+// Game.prototype.validateBoard = function(){
+    // SETS this.checkGuess
+    // This is unique to the version of the game
+    
+    // Try some craftiness with returning funcions
+    // maybe make this an object with a set method for 
+    // answers
+    }
+// }
+// -----------------------------------------
+// Player Management Prototypes
+// ---Player Guesses
+// ---Player Passes
+// ---Player Quits
+// ---Player Joins******Pre-Start
+// -----------------------------------------
+// Possibly Make A prototype for Game Start
+// -At Game start this would preform all of the setup
+
+// Game Start Prototype
+// ---Randomize Player Order * Optional
+// ---Create And Validate Game Board ** This Would be a Single method Call
+// **-->^^This method would set the Value of the checkGuess Function
+// **-->^^Also Sets the value of this.letters << this.letters is just the letters array
+// -----------------------------------------
+// Need A prototype to check end of game
+
+// -----------------------------------------
+// CHECK ANSWERS
+
+// Easy way to check while telling Big O to Go fuck itself
+// Use index of on each array in the answer list
+
+// Checking against the answers is going to require Tinkering
+// The Order of the letters input should not determine right or wrong
+// The Coordinates should determine if an answer is write or wrong
+// Caveate Paladrones are they worth double the points << If We are keeping score at all
+// When checking answers filter out Answers that are not the same length as the users Guess
+// -----------------------------------------
+
 function Board(){
     // Might Not Go in DB
     this.alphabet = ["A","A","A","B","B","C","C","D","D","E","E","E","E","F","F","G","G","H","H","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","P","P","Q","R","R","S","S","T","T","U","U","V","W","X","Y","Y","Z"];
     // DB Field
-    // Change This to a Dictionary
     this.answers = [];
     // DB Field
     this.letters;
-    // DB Field
+    // Not DB Field 
     this.letterIndex = {};
 }
 Board.prototype.populate = function(characterSet){
-    console.log(arguments.length);
     if (!characterSet){
         characterSet = this.alphabet;
     }
@@ -50,6 +88,8 @@ function Search(board){
     this.board = board;
 }
 Search.prototype.checkFirstLetter = function(word){
+    // Takes One word and checks to see if the board has
+    // the first letter
     if (!this.board.letterIndex.hasOwnProperty(word[0])){
         return false;
     }
@@ -77,7 +117,7 @@ Search.prototype.checkSurround = function(cooordinate, word){
             }
         }
         if(answerCoordinates.length == word.length){
-            this.board.answers.push(answerCoordinates.join(";"));
+            this.board.answers.push({'word':word, 'coordinates':answerCoordinates});
         }
     }
 
@@ -111,11 +151,21 @@ Search.prototype.checkSurround = function(cooordinate, word){
 // exports.board = Board;
 // exports.search = Search;
 var currentBoard;
-
+// Turn this into a createGame
 exports.createBoard = function(cb){
     var currentBoard = new Board();
     currentBoard.populate();
+    // Make entry in DB
     cb(currentBoard.letters);
+}
+
+var db = require("../db");
+
+exports.getGame = function(cb){
+    var collection = db.collection("games");
+    collection.find().toArray(function(err,docs){
+        cb(err, docs);
+    });
 }
 
 
