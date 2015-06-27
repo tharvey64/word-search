@@ -42,6 +42,7 @@ Game.prototype.validateBoard = function(board, wordList){
 
     this.checkGuess = function(guess){
         // guess = {'word': guess word string,'coordinates':guess coordinates array}
+        // if (this.consecutivePasses != 0) this.consecutivePasses = 0;
         if (guess['cooordinates'].length != guess['word'].length) return false;
 
         var numberOfAnswers = board.answers.length;
@@ -72,6 +73,15 @@ Game.prototype.validateBoard = function(board, wordList){
     this.foundWords = board.answers;
     // -----------------------------------------
     return true;
+}
+Game.prototype.endTurn = function(){
+    // Find a Faster Way Like a Linked List With a Tail Pointer
+    // Check If game is Over
+    var last = this.players.shift();
+    this.players.push(last);
+}
+Game.prototype.pass = function(){
+    this.consecutivePasses += 1;
 }
 // -----------------------------------------
 // Player Management Prototypes
@@ -170,7 +180,7 @@ Search.prototype.checkSurround = function(cooordinate, word){
 
         var answerCoordinates = [startObj['index'].join(","),[sR1,sC1].join(","),[sR2,sC2].join(","),[sR3,sC3].join(",")];
         //----------------------------------------
-        
+
         for(var index = 4; index < restOfWord+1; index++){
             checkRow = startObj['index'][0]+(row * index);
             checkColumn = startObj['index'][1]+(column * index);

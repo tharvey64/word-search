@@ -20,6 +20,7 @@ router.get('/letters', function(req, res){
 
 // NOT ACTIVE
 // router.get("/load/:game_id", function(req, res){
+//     var gameId = req.params.game_id
 //     res.send({'route':'/load'});
 //     // Boards.loadGame(function(err, docs){
 //     //     res.render("boards", {boards: docs});
