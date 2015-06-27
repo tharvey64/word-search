@@ -13,6 +13,8 @@ exports.all = function(cb){
 }
 
 exports.startsWith = function(letters,cb){
+    // Process Input Here or SomeWhere Else
+    // ------------------------------------------
     var letterRegex = "";
     var limit = letters.length;
     for(i=0; i<limit;i++){

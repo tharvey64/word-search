@@ -11,20 +11,70 @@
 function Game(){
     this.gameKey;
     this.players = [];
+    this.validGame = false;
+    // Might change this to the Board Object
     this.letters;
     this.foundWords = [];
     this.consecutivePasses = 0;
+    // If I can store functions in the db then I will do that
+    // Instead of Saving the Board Object to the game
     this.checkGuess;
 }
-// Game.prototype.validateBoard = function(){
+Game.prototype.validateBoard = function(board, wordList){
+    // returns True or False
+    var validate = new Search(boardPrep);
+    var limit = wordList.length;
+
+    for (var i=0;i < limit; i++){
+        validate.checkFirstLetterOf(wordList[i]);
+    }
+    // -----------------------------------------
+    // To reduce risk of Boards with low word counts find optimum word set
+    // This will increase the chances of Boards with more than 10 words
+    // -----------------------------------------
+    if (board.answers.length < 10){
+        return false;
+    }
+
+    this.letters = board.letters;
+
+    // Storing this in the db might not save the values of board
+    // This is Reliant on this functions scope 
+    // If i can store the function but not the scope of the function 
+    // The function will have to change
+
+    this.checkGuess = function(guess){
+        // guess = {'word': guess word string,'coordinates':guess coordinates array}
+        if (guess['cooordinates'].length != guess['word'].length) return false;
+
+        var numberOfAnswers = board.answers.length;
+        var guessLength = guess['cooordinates'].length;
+
+        for(var index = 0; index < numberOfAnswers; index++){
+            if (guessLength != board.answers[i]['cooordinates'].length) continue;
+            var answer = board.answers[i]['cooordinates'];
+            for(var j = 0; j < guessLength; j++){
+                if (!(~answer.indexOf(guess['cooordinates'][i]))) break;
+
+                if (j + 1 == guessLength){
+                    this.foundWords.push(board.answers[i]);
+                    return true;
+                }
+            } 
+        }
+        return false;
+    }
+    
+    this.validGame = true;
+    return true;
+    // checking guesses may be easier than I first thought
+    // using indexof
     // SETS this.checkGuess
     // This is unique to the version of the game
-    
-    // Try some craftiness with returning funcions
-    // maybe make this an object with a set method for 
-    // answers
-    }
-// }
+    // The Allowed Directions for Words should be imposed within 
+    // the Search object
+    // -----------------------------------------
+}
 // -----------------------------------------
 // Player Management Prototypes
 // ---Player Guesses
@@ -55,6 +105,14 @@ function Game(){
 // Caveate Paladrones are they worth double the points << If We are keeping score at all
 // When checking answers filter out Answers that are not the same length as the users Guess
 // -----------------------------------------
+// This Method Might be Unnecssary if I Can Stroe The checkGuess Function
+// 
+// Prototype to send Object Literal to Client
+// -The Object Will Contain
+// --The Games Check answer function
+// --The List of Words that have already been Found
+// --The Board of Letters
+// --**Possibly Additional Information**
 
 function Board(){
     // Might Not Go in DB
@@ -64,16 +122,17 @@ function Board(){
     // DB Field
     this.letters;
     // Not DB Field 
-    this.letterIndex = {};
+    this.letterIndex;
 }
 Board.prototype.populate = function(characterSet){
     if (!characterSet){
         characterSet = this.alphabet;
     }
     this.letters = [];
-    for (i = 0; i < 15; i++){
+    this.letterIndex = {};
+    for (var i = 0; i < 15; i++){
         this.letters.push([]);
-        for(j = 0; j < 15; j++){
+        for(var j = 0; j < 15; j++){
             var newLetter = characterSet[Math.floor(Math.random()*characterSet.length)];
             if (!this.letterIndex.hasOwnProperty(newLetter)){
                 this.letterIndex[newLetter] = [];
@@ -87,13 +146,14 @@ Board.prototype.populate = function(characterSet){
 function Search(board){
     this.board = board;
 }
-Search.prototype.checkFirstLetter = function(word){
+Search.prototype.checkFirstLetterOf = function(word){
     // Takes One word and checks to see if the board has
     // the first letter
     if (!this.board.letterIndex.hasOwnProperty(word[0])){
         return false;
     }
-    for (i = 0; i < this.board.letterIndex[word[0]].length; i++){
+    var numberOfOccurrences = this.board.letterIndex[word[0]].length;
+    for (var i = 0; i < numberOfOccurrences; i++){
         var currentLetter = this.board.letterIndex[word[0]][i];
         this.checkSurround(currentLetter, word);
     }
@@ -106,8 +166,7 @@ Search.prototype.checkSurround = function(cooordinate, word){
 
     var findWord = function(row, column){
         var answerCoordinates = [];
-        
-        for(index = 0; index < word.length; index++){
+        for(var index = 0; index < restOfWord+1; index++){
             checkRow = startObj['index'][0]+(row * index);
             checkColumn = startObj['index'][1]+(column * index);
             if(word[index] != this.board.letters[checkRow][checkColumn]['letter']){
@@ -116,7 +175,7 @@ Search.prototype.checkSurround = function(cooordinate, word){
                 answerCoordinates.push([checkRow,checkColumn].join(","));
             }
         }
-        if(answerCoordinates.length == word.length){
+        if(answerCoordinates.length == restOfWord+1){
             this.board.answers.push({'word':word, 'coordinates':answerCoordinates});
         }
     }
@@ -187,12 +246,12 @@ if(!module.parent){
 
     lineReader.eachLine('dictionary.txt', function(line) {
         if (line.length > 3){
-            searchBoard.checkFirstLetter(line.toUpperCase());
+            searchBoard.checkFirstLetterOf(line.toUpperCase());
         }
     }).then(function(){
-        for (i = 0; i < game.letters.length; i++){
+        for (var i = 0; i < game.letters.length; i++){
             var row = [];
-            for (j = 0; j < game.letters[0].length; j++){
+            for (var j = 0; j < game.letters[0].length; j++){
                 row.push(game.letters[i][j]['letter']);
             }
             console.log(row.join("-"));
