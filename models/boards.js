@@ -29,7 +29,7 @@ Game.prototype.validateBoard = function(board, wordList){
         validate.checkFirstLetterOf(wordList[i]);
     }
     // -----------------------------------------
-    // To reduce risk of Boards with low word counts find optimum word set
+    // To reduce risk of Boards with low word counts find optimum word set.
     // This will increase the chances of Boards with more than 10 words
     // -----------------------------------------
     if (board.answers.length < 10){
@@ -67,13 +67,6 @@ Game.prototype.validateBoard = function(board, wordList){
     
     this.validGame = true;
     return true;
-    // checking guesses may be easier than I first thought
-    // using indexof
-    // SETS this.checkGuess
-    // This is unique to the version of the game
-    // The Allowed Directions for Words should be imposed within 
-    // the Search object
-    // -----------------------------------------
 }
 // -----------------------------------------
 // Player Management Prototypes
