@@ -1,13 +1,9 @@
-// exports.createGame = function(callback){
-
-// }
-
-// Games need players and current turn
-// Create Game Class
 // Game rules go in the Game class
+// If I pass the Search Obj into validateBoard 
+// it would decouple the game from the search Obj
 // Game holds its unique game id
 
-// i might have to index each word
+// Players Should be unique usernames when i am done
 function Game(){
     this.gameKey;
     this.players = [];
@@ -21,8 +17,9 @@ function Game(){
     this.checkGuess;
 }
 Game.prototype.validateBoard = function(board, wordList){
+    // Pass the Search Obj? Search Obj is Initialized by the Board
     // returns True or False
-    var validate = new Search(boardPrep);
+    var validate = new Search(board);
     var limit = wordList.length;
 
     for (var i=0;i < limit; i++){
@@ -58,6 +55,10 @@ Game.prototype.validateBoard = function(board, wordList){
 
                 if (j + 1 == guessLength){
                     this.foundWords.push(board.answers[i]);
+                    // This Ignores Palindrones
+                    // How Would I Do That
+                    // I could immediatly jump to other words
+                    // In the list that are the same word
                     return true;
                 }
             } 
@@ -66,6 +67,10 @@ Game.prototype.validateBoard = function(board, wordList){
     }
     
     this.validGame = true;
+    // -----------------------------------------
+    // For Development Only This Will Equal [] In Production
+    this.foundWords = board.answers;
+    // -----------------------------------------
     return true;
 }
 // -----------------------------------------
@@ -77,6 +82,8 @@ Game.prototype.validateBoard = function(board, wordList){
 // -----------------------------------------
 // Possibly Make A prototype for Game Start
 // -At Game start this would preform all of the setup
+// ---validating board
+// ---figuring out Who is in the game
 
 // Game Start Prototype
 // ---Randomize Player Order * Optional
@@ -88,24 +95,10 @@ Game.prototype.validateBoard = function(board, wordList){
 
 // -----------------------------------------
 // CHECK ANSWERS
-
-// Easy way to check while telling Big O to Go fuck itself
-// Use index of on each array in the answer list
-
-// Checking against the answers is going to require Tinkering
-// The Order of the letters input should not determine right or wrong
-// The Coordinates should determine if an answer is write or wrong
-// Caveate Paladrones are they worth double the points << If We are keeping score at all
+// Paladrones are they worth double the points << If We are keeping score at all
 // When checking answers filter out Answers that are not the same length as the users Guess
 // -----------------------------------------
-// This Method Might be Unnecssary if I Can Stroe The checkGuess Function
-// 
-// Prototype to send Object Literal to Client
-// -The Object Will Contain
-// --The Games Check answer function
-// --The List of Words that have already been Found
-// --The Board of Letters
-// --**Possibly Additional Information**
+// I need a Prototype that updates game state
 
 function Board(){
     // Might Not Go in DB
@@ -152,24 +145,44 @@ Search.prototype.checkFirstLetterOf = function(word){
     }
 }
 Search.prototype.checkSurround = function(cooordinate, word){
-    var startObj = this.board.letters[cooordinate[0]][cooordinate[1]];
-    var numberOfColumns = this.board.letters[0].length;
-    var numberOfRows = this.board.letters.length;
+    var grid = this.board.letters;
+    var startObj = grid[cooordinate[0]][cooordinate[1]];
+    var numberOfColumns = grid[0].length;
+    var numberOfRows = grid.length;
     var restOfWord = word.length - 1;
 
     var findWord = function(row, column){
-        var answerCoordinates = [];
-        for(var index = 0; index < restOfWord+1; index++){
+        // Optimizes Search
+        // Decreases Time By Half
+        //----------------------------------------
+        var sR1 = startObj['index'][0]+(row * 1),
+        sC1 = startObj['index'][1]+(column * 1),
+        sR2 = startObj['index'][0]+(row * 2),
+        sC2 = startObj['index'][1]+(column * 2),
+        sR3 = startObj['index'][0]+(row * 3),
+        sC3 = startObj['index'][1]+(column * 3);
+
+        var secondLetter = grid[sR1][sC1]['letter'],
+        thirdLetter = grid[sR2][sC2]['letter'],
+        fourthLetter = grid[sR3][sC3]['letter'];
+
+        if (secondLetter + thirdLetter + fourthLetter != word.substring(1,4)) return false;
+
+        var answerCoordinates = [startObj['index'].join(","),[sR1,sC1].join(","),[sR2,sC2].join(","),[sR3,sC3].join(",")];
+        //----------------------------------------
+        
+        for(var index = 4; index < restOfWord+1; index++){
             checkRow = startObj['index'][0]+(row * index);
             checkColumn = startObj['index'][1]+(column * index);
-            if(word[index] != this.board.letters[checkRow][checkColumn]['letter']){
-                break;
+            if(word[index] != grid[checkRow][checkColumn]['letter']){
+                return false;
             }else{
                 answerCoordinates.push([checkRow,checkColumn].join(","));
             }
         }
         if(answerCoordinates.length == restOfWord+1){
             this.board.answers.push({'word':word, 'coordinates':answerCoordinates});
+            return true;
         }
     }
 
@@ -199,56 +212,73 @@ Search.prototype.checkSurround = function(cooordinate, word){
     }
 }
 
-// This should export a game not The Board or Search
-// exports.board = Board;
-// exports.search = Search;
-var currentBoard;
-// Turn this into a createGame
-exports.createBoard = function(cb){
-    var currentBoard = new Board();
-    currentBoard.populate();
-    // Make entry in DB
-    cb(currentBoard.letters);
-}
+// Anything that has to access the db (like board validation)
+// should hit a route
+// Keep that in mind
+// What Has To Happen on The Server Side
+// Send the Game back to the server to start it
 
-var db = require("../db");
+// exports.createGame = function(callback){
+//     return new Game();
+//     // Creates a game Object And Sends It to the admin
+//     // The Room Joined by Players should be the id of the Game Key
+//     // Game Key should probably be a hash of the the users Socket and the date
+//     // as salt
+// }
 
-exports.getGame = function(cb){
-    var collection = db.collection("games");
-    collection.find().toArray(function(err,docs){
-        cb(err, docs);
-    });
-}
+// // Requires Game Instance and listOfWords
+// exports.startGame = function(game, listOfWords, callback){
+//     // Runs game Validation and Set up
+// }
 
+// var db = require("../db");
+
+// Requires Game Instance
+// exports.saveGame = function(game, callback){}
+
+// Requires Game Key or Id
+// exports.getGame = function(callback){
+//     var collection = db.collection("games");
+//     collection.find().toArray(function(err,docs){
+//         callback(err, docs);
+//     });
+// }
+
+// Test the goddamn game
 
 if(!module.parent){
     // TESTS Should Replace This
-    var game = new Board();
-    console.log(game.alphabet);
-    console.log(game.letters);
-    console.log(game.letterIndex);
-    console.log(game.answers);
-    game.populate();
-    console.log(game.letters);
-    console.log(game.letterIndex);
-    console.log(game.letters.length);
-    console.log(game.letters[0].length);
+    var boardTest = new Board();
+   boardTest.populate();
+    // console.log(boardTest.letters);
+    // console.log(boardTest.letterIndex);
+    console.log(boardTest.letters.length);
+    console.log(boardTest.letters[0].length);
     // Search Speed Needs to be increased
-    var searchBoard = new Search(game);
+    // var searchBoard = new Search(boardTest);
     var lineReader = require('line-reader');
+    var wordList = [];
 
-    lineReader.eachLine('dictionary.txt', function(line) {
+    lineReader.eachLine('./zcodeBits/dictionary.txt', function(line) {
         if (line.length > 3){
-            searchBoard.checkFirstLetterOf(line.toUpperCase());
+            // searchBoard.checkFirstLetterOf(line.toUpperCase());
+            wordList.push(line.toUpperCase());
         }
     }).then(function(){
-        for (var i = 0; i < game.letters.length; i++){
-            var row = [];
-            for (var j = 0; j < game.letters[0].length; j++){
-                row.push(game.letters[i][j]['letter']);
+        var gameTest = new Game();
+        if (gameTest.validateBoard(boardTest, wordList)){
+            for (var i = 0; i < boardTest.letters.length; i++){
+                var row = [];
+                for (var j = 0; j <boardTest.letters[0].length; j++){
+                    row.push(boardTest.letters[i][j]['letter']);
+                }
+                console.log(row.join("-"));
             }
-            console.log(row.join("-"));
+            console.log(boardTest.answers);
         }
-        console.log(game.answers);
+        else{
+            console.log("Fail");
+            console.log(boardTest.answers);
+        }
     });
 }

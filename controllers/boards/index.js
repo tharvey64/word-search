@@ -4,10 +4,9 @@ path = require('path');
 
 var Boards = require("../../models/boards");
 
-// Need to think About these routes more
-// These should be game centric routes not
-// Board based routes
-// Create the Game Class
+// Build routes For Game Actions
+// Start By sending a validated board
+// The game admin
 
 router.get('/board', function(req, res){
     res.sendFile(path.join(__dirname ,'../../public/','board.html'));
