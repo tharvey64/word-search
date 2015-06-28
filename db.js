@@ -7,7 +7,7 @@ exports.connect = function(url, callback) {
 
     mongo.connect(url, function(err, _db){
         if (err){
-            throw new Error('Could not connect: '+err)
+            throw new Error('Could not connect: ' + err)
         }
         db = _db;
         connected = true;

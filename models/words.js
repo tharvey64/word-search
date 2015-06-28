@@ -13,21 +13,7 @@ exports.all = function(cb){
 }
 
 exports.startsWith = function(letters,cb){
-    // Process Input Here or SomeWhere Else
-    // ------------------------------------------
-    var letterRegex = "";
-    var limit = letters.length;
-    for(i=0; i<limit;i++){
-        if (i + 1 == letters.length){
-            letterRegex += letters[i];
-        }
-        else{
-            letterRegex += letters[i] + "|";
-        }
-    }
-    var r = '^(' + letterRegex + ')';
-    // ------------------------------------------
-
+    var r = '^(' + letters.join('|') + ')';
     var cursor = db.collection("words");
     cursor.find({'word':{$regex: r, $options: 'i'}}).toArray(function(err,docs){
         if(err){

@@ -72,10 +72,10 @@ $(document).ready(function(){
 	$('#createGame').on('click', '#startGame',function(){
 		var gameId = sessionId + String(games);
 		
-		$.get('/game/board', function(data){
+		$.get('/games/board', function(data){
 			var template = data;
 			Mustache.parse(template);
-			$.get('/game/letters', function(data){
+			$.get('/games/letters', function(data){
 				var board = Mustache.render(template, data);
 				socket.emit('start game', board, gameId);
 			});
