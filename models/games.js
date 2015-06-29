@@ -3,19 +3,25 @@
 // Nickname
 // Score 
 // GameID
-function Player(){
-    this.nickname;
-    this.playerID;
-    this.gameID;
-    this.score;
+function Player(nickname, key){
+    this.nickname = nickname;
+    this.key = key;
+    this.gameKey;
+    this.score = 0;
+}
+Player.prototype.compare = function(player){
+    // Could add gameKey
+    if (this.nickname == player.nickname) return true;
+    if (this.key == player.key) return true;
 }
 
-function Game(admin, board){
+function Game(admin, board, key){
     this.admin = admin;
-    this.gameID;
+    this.gameKey = key;
     this.currentTurn = 0;
     this.consecutivePasses = 0;
-    this.players = [];
+    // Adding the Admin on Init depends on how i set the client side up
+    this.players = [admin];
     this.board = board;
     this.foundWords = [];
     this.gameStatus = "Waiting";
@@ -33,9 +39,14 @@ Game.prototype.validateBoard = function(wordList){
     }
     return true;
 }
-Game.prototype.checkGuess = function(guess){
+Game.prototype.checkGuess = function(playerKey, guess){
+    if (playerKey != this.players[this.currentTurn].key) return false;
+    var player = this.players[this.currentTurn];
     // guess = {'word': guess word string,'coordinates':guess coordinates array}
-    // Probably have to reset passes here
+    // End There Turn And Process There Guess
+    this.endTurn();
+    // This Should Prevent Multiple submissions
+
     if (this.consecutivePasses != 0) this.consecutivePasses = 0;
 
     if (guess['cooordinates'].length != guess['word'].length) return false;
@@ -52,7 +63,8 @@ Game.prototype.checkGuess = function(guess){
 
             if (j + 1 == guessLength){
                 this.foundWords.push(this.board.answers[i]);
-                this.endTurn();
+                player.score += guessLength;
+                // if (this.foundWords.length == this.board.answers.length) this.gameOver();
                 return true;
             }
         } 
@@ -66,21 +78,27 @@ Game.prototype.endTurn = function(){
 }
 Game.prototype.pass = function(){
     this.consecutivePasses += 1;
+    // if ((this.players.length == this.consecutivePasses) this.gameOver();
     this.endTurn();
 }
-Game.prototype.joinGame = function(username){
-    // This IS Going To Get Messy
-    if(~this.players.indexOf(username)) return false;
-    this.players.push(username);
+Game.prototype.joinGame = function(user){
+    var count = this.players.length;
+    // Validate Uniqueness
+    for (var i = 0; i < count; i++){
+        if (user.compare(this.players[i])) return false;
+    }
+    this.players.push(user);
     return true
 }
 Game.prototype.endGame = function(){
-    // Checking length every turn is a poor way to do this
     if ((this.players.length == this.consecutivePasses) || (this.foundWords.length == this.board.answers.length)){
         return true;
     }else{
         return false
     }
+    // These Two Conditions can be checked elsewhere
+    // Putting them Here makes it easy to Add more conditions that terminate the game
+    // Making this an object would make the Game more Flexible
 }
 // Game.prototype.quitGame = function(username) {
     
@@ -217,7 +235,7 @@ Search.prototype.checkSurround = function(cooordinate, word){
     }
 }
 
-module.exports = {'game': Game, 'board': Board, 'search': Search};
+module.exports = {'Player': Player,'game': Game, 'board': Board, 'search': Search};
 
 if(!module.parent){
     // TESTS Should Replace This

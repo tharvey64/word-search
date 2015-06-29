@@ -3,7 +3,7 @@ router = express.Router(),
 path = require('path'),
 make = require('../../lib/idGenerator');
 
-var play = require("../../models/games");
+var gameModels = require("../../models/games");
 
 var Words = require("../../models/words");
 // Build routes For Game Actions
@@ -16,15 +16,16 @@ var games = {};
 router.post('/create', function(req, res){
     var nickname = req.body.nickname || "Guest" + make.key(),
     gameID = make.key(),
-    admin = {'playerID': make.key(),'nickname': nickname, 'game': gameID};
-    // admin is going to be a player object
+    admin = gameModels.Player(nickname,make.key());
+
+    admin.gameKey = gameID;
 
     res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.playerID);
     
-    var grid = new play.board();
+    var grid = new gameModels.board();
     grid.populate();
-    games[gameID] = new play.game(admin, grid);
-    games[gameID].gameKey = gameID;
+
+    games[gameID] = new gameModels.game(admin, grid, gameID);
 
     var letters = Object.keys(grid.letterIndex);
     Words.startsWith(letters, function(err, docs){
@@ -32,6 +33,7 @@ router.post('/create', function(req, res){
     });
 });
 
+// Not Sure If This Will be The Set Up
 router.get('/create/:game/:nickname/:player', function(req, res){
     var game = req.params.game;
     var nickname = req.params.nickname;
@@ -42,31 +44,52 @@ router.get('/create/:game/:nickname/:player', function(req, res){
 router.post('/join', function(req, res){
     var gameID = req.body.gameID;
     var nickname = req.body.nickname || "Guest" + make.key();
+    var newPlayer = gameModels.Player(nickname, make.key());
 
-    if (games[gameID].joinGame(nickname)){
-        // res.redirect('/games/join/' + nickname + '/' + player);
-        res.json({'registered': true,'playerID': make.key(),'nickname': nickname});
-    }
-    res.json({'registered': false});
+    games[gameID].joinGame(newPlayer)
+    res.redirect('/games/join/' + gameID + '/' + newPlayer.key);
 });
 
-// router.get('/join', function(req, res){
+router.get('/join/:game/:player', function(req, res){
+    // There Needs To be middleware to confirms valid game
+    // The Db will probably do that
+    var game = req.params.game;
+    var playerKey = req.params.player;
+    var count = games[gameID].players.length;
+    var joined = false;
+    
+    for (var i = 0; i < count; i++){
+        if (playerKey == games[gameID].players[i].key){
+            res.json({'registered': true,'playerID': playerKey,'nickname': games[gameID].players[i].nickname});
+            joined = true;
+            break;
+        }
+    }
+    if (!joined){
+        res.json({'registered': false});
+    }
+});
 
-// });
 
-// Temporary Url
 router.post('/start', function(req, res){
     // Some Of this stuff must be middleware
     var gameID = req.body.gameID;
     var playerID = req.body.playerID;
-    if (games[gameID].admin.playerID != playerID){
+
+    if (games[gameID].admin.playerID == playerID){
+        games[gameID].gameStatus = "In Play";
+    }
+    res.redirect('/games/start/' + gameID);
+});
+
+router.get('/start/:game', function(req, res){
+    var gameID = req.params.game;
+    if (games[gameID].gameStatus == "In Play"){
+        res.json({success: true, message: "In Play", grid: games[gameID].board.letters});
+    }
+    else{
         res.json({success: false, message: "Waiting", grid: null});
     }
-    // needs a game key or id and admin confirmation
-    // Changes the Games Status Should Then redirect to /info
-    games[gameID].gameStatus = "In Play";
-    // I think this is the Success response
-    res.json({success: true, message: "In Play", grid: games[gameID].board.letters});
 });
 
 // Temporary Url
@@ -92,6 +115,12 @@ router.get('/info', function(req, res){
 // User Guess 
 // If It is valid it does update the Game so post
 router.post('/play', function(req, res){
+    // the request body will have the guess, gameKey, playerKey
+    // needs a game key or id and turn confirmation
+});
+
+router.get('/play', function(req, res){
+    // this needs success and score(round? or overall?)
     // needs a game key or id and turn confirmation
 });
 
