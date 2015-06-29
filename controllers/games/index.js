@@ -11,16 +11,19 @@ var Words = require("../../models/words");
 // The game admin
 
 // Fake DB For Development
+// ----------------------------------------
+// Need to Either call it gameKey or gameID
+// ----------------------------------------
 var games = {};
 
 router.post('/create', function(req, res){
     var nickname = req.body.nickname || "Guest" + make.key(),
     gameID = make.key(),
-    admin = gameModels.Player(nickname,make.key());
+    admin = new gameModels.Player(nickname,make.key());
 
     admin.gameKey = gameID;
 
-    res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.playerID);
+    res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.key);
     
     var grid = new gameModels.board();
     grid.populate();
@@ -35,25 +38,25 @@ router.post('/create', function(req, res){
 
 // Not Sure If This Will be The Set Up
 router.get('/create/:game/:nickname/:player', function(req, res){
-    var game = req.params.game;
+    var gameID = req.params.game;
     var nickname = req.params.nickname;
     var player = req.params.player;
-    res.json({'player': player, 'nickname': nickname, 'game': game});
+    res.json({'player': player, 'nickname': nickname, 'game': gameID});
 });
 
 router.post('/join', function(req, res){
     var gameID = req.body.gameID;
     var nickname = req.body.nickname || "Guest" + make.key();
-    var newPlayer = gameModels.Player(nickname, make.key());
+    var newPlayer = new gameModels.Player(nickname, make.key());
 
-    games[gameID].joinGame(newPlayer)
+    games[gameID].joinGame(newPlayer);
     res.redirect('/games/join/' + gameID + '/' + newPlayer.key);
 });
 
 router.get('/join/:game/:player', function(req, res){
     // There Needs To be middleware to confirms valid game
     // The Db will probably do that
-    var game = req.params.game;
+    var gameID = req.params.game;
     var playerKey = req.params.player;
     var count = games[gameID].players.length;
     var joined = false;
@@ -76,7 +79,7 @@ router.post('/start', function(req, res){
     var gameID = req.body.gameID;
     var playerID = req.body.playerID;
 
-    if (games[gameID].admin.playerID == playerID){
+    if (games[gameID].admin.key == playerID){
         games[gameID].gameStatus = "In Play";
     }
     res.redirect('/games/start/' + gameID);
