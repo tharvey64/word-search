@@ -8,7 +8,7 @@ function buildBoard(gameId){
 		});
 	});
 }
-
+// This is going to look a bit different and cleaner by tomorrow
 $(document).ready(function(){
 	var nickname = prompt("Please enter a username:");
 	var socket = io();
@@ -20,11 +20,6 @@ $(document).ready(function(){
 	socket.on('userName taken', function(name){
 		nickname = prompt(name + " has already been taken. Please enter a different username:");
 		socket.emit('userName', nickname);
-	});
-
-	// Replace this with something else
-	socket.on('sessionId', function(id){
-		sessionId = id;
 	});
 
 	socket.on('start game', function(gameBoard){

@@ -127,6 +127,7 @@ Board.prototype.populate = function(characterSet){
                 this.letterIndex[newLetter] = [];
             }
             this.letterIndex[newLetter].push([i,j]);
+            // add text color as property
             this.letters[i].push({'letter': newLetter,'index': [i,j]});
         }
     }
