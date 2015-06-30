@@ -15,28 +15,35 @@ Player.prototype.compare = function(player){
     if (this.key == player.key) return true;
 }
 
-function Game(admin, board, key){
+function Game(admin, board){
     this.admin = admin;
-    this.gameKey = key;
+    this.gameKey = admin.gameKey;
     this.currentTurn = 0;
     this.consecutivePasses = 0;
     // Adding the Admin on Init depends on how i set the client side up
     this.players = [admin];
     this.board = board;
     this.foundWords = [];
-    this.gameStatus = "Waiting";
+    // "Building","Waiting","In Play","Complete"
+    this.gameStatus = "Building";
 }
-Game.prototype.validateBoard = function(wordList){
+Game.prototype.setup = function(){
+    // Wow Game Class Is Tangled as Hell
+    this.board.setup();
+    return Object.keys(this.board.letterIndex);
+}
+Game.prototype.validateBoard = function(searcher, wordList){
     // returns True or False
-    var validate = new Search(this.board);
+    var validator = new searcher(this.board);
     var limit = wordList.length;
 
     for (var i=0;i < limit; i++){
-        validate.checkFirstLetterOf(wordList[i]);
+        validator.locate(wordList[i]);
     }
     if (this.board.answers.length < 10){
         return false;
     }
+    this.gameStatus = "Waiting";
     return true;
 }
 Game.prototype.checkGuess = function(playerKey, guess){
@@ -132,7 +139,7 @@ function Board(){
     this.letters;
     this.letterIndex;
 }
-Board.prototype.populate = function(characterSet){
+Board.prototype.setup = function(characterSet){
     characterSet = characterSet || ["A","A","A","B","B","C","C","D","D","E","E","E","E","F","F","G","G","H","H","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","P","P","Q","R","R","S","S","T","T","U","U","V","W","X","Y","Y","Z"];
 
     this.letters = [];
@@ -156,7 +163,7 @@ Board.prototype.populate = function(characterSet){
 function Search(board){
     this.board = board;
 }
-Search.prototype.checkFirstLetterOf = function(wordObj){
+Search.prototype.locate = function(wordObj){
     // Temporary Fix Words will Be entered in db in UpperCase
     var word = wordObj['word'].toUpperCase();
     if (!this.board.letterIndex.hasOwnProperty(word[0])){
@@ -240,7 +247,7 @@ module.exports = {'Player': Player,'game': Game, 'board': Board, 'search': Searc
 if(!module.parent){
     // TESTS Should Replace This
     var boardTest = new Board();
-   boardTest.populate();
+   boardTest.setup();
     // console.log(boardTest.letters);
     // console.log(boardTest.letterIndex);
     console.log(boardTest.letters.length);
@@ -252,7 +259,7 @@ if(!module.parent){
 
     lineReader.eachLine('./zcodeBits/dictionary.txt', function(line) {
         if (line.length > 3){
-            // searchBoard.checkFirstLetterOf(line.toUpperCase());
+            // searchBoard.locate(line.toUpperCase());
             wordList.push(line.toUpperCase());
         }
     }).then(function(){

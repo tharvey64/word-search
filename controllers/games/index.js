@@ -10,38 +10,50 @@ var Words = require("../../models/words");
 // Start By sending a validated board
 // The game admin
 
-// Fake DB For Development
 // ----------------------------------------
 // Need to Either call it gameKey or gameID
 // ----------------------------------------
+
+// Fake DB For Development
 var games = {};
 
+router.param('game', function(req,res,next,id){
+    // This Is Where you would hit the DB To Locate The Game
+    if (!games[id]){
+        res.status(404).send({error:"Game Not Found."});
+        return;
+    }
+    else{
+        req.params.game = games[id];
+        next();
+    }
+});
+
 router.post('/create', function(req, res){
-    var nickname = req.body.nickname || "Guest" + make.key(),
-    gameID = make.key(),
-    admin = new gameModels.Player(nickname,make.key());
+    // Authentication Middleware Here
+    var nickname = req.body.nickname || "Guest" + make.key();
+    var admin = new gameModels.Player(nickname, make.key());
 
+    var gameID = make.key();
     admin.gameKey = gameID;
-
     res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.key);
-    
-    var grid = new gameModels.board();
-    grid.populate();
+    // create game
+    // ------------------------------------------------ 
+    games[gameID] = new gameModels.game(admin, new gameModels.board());
 
-    games[gameID] = new gameModels.game(admin, grid, gameID);
-
-    var letters = Object.keys(grid.letterIndex);
-    Words.startsWith(letters, function(err, docs){
-        console.log(games[gameID].validateBoard(docs));
-    });
+    (function repeater(game){ 
+        Words.startsWith(game.setup(), function(err, docs){
+            if (!games[gameID].validateBoard(gameModels.search, docs)) repeater(game.setup());
+        });
+    })(games[gameID]);
 });
 
 // Not Sure If This Will be The Set Up
 router.get('/create/:game/:nickname/:player', function(req, res){
-    var gameID = req.params.game;
+    var game = req.params.game;
     var nickname = req.params.nickname;
     var player = req.params.player;
-    res.json({'player': player, 'nickname': nickname, 'game': gameID});
+    res.json({'player': player, 'nickname': nickname, 'game': game.gameKey});
 });
 
 router.post('/join', function(req, res){
@@ -49,21 +61,26 @@ router.post('/join', function(req, res){
     var nickname = req.body.nickname || "Guest" + make.key();
     var newPlayer = new gameModels.Player(nickname, make.key());
 
+    if (!games[gameID]){
+        res.status(404).send({error:"Game Not Found."});
+        return;
+    }
+
     games[gameID].joinGame(newPlayer);
     res.redirect('/games/join/' + gameID + '/' + newPlayer.key);
 });
 
 router.get('/join/:game/:player', function(req, res){
-    // There Needs To be middleware to confirms valid game
     // The Db will probably do that
-    var gameID = req.params.game;
+    var game = req.params.game;
+
     var playerKey = req.params.player;
-    var count = games[gameID].players.length;
+    var count = game.players.length;
     var joined = false;
     
     for (var i = 0; i < count; i++){
-        if (playerKey == games[gameID].players[i].key){
-            res.json({'registered': true,'playerID': playerKey,'nickname': games[gameID].players[i].nickname});
+        if (playerKey == game.players[i].key){
+            res.json({'registered': true,'playerID': playerKey,'nickname': game.players[i].nickname});
             joined = true;
             break;
         }
@@ -79,6 +96,14 @@ router.post('/start', function(req, res){
     var gameID = req.body.gameID;
     var playerID = req.body.playerID;
 
+    // ----------------------------------------
+    // This Should be middleware use app.use
+    if (!games[gameID]){
+        res.status(404).send({error:"Game Not Found."});
+        return;
+    }
+    // ----------------------------------------
+
     if (games[gameID].admin.key == playerID){
         games[gameID].gameStatus = "In Play";
     }
@@ -86,9 +111,9 @@ router.post('/start', function(req, res){
 });
 
 router.get('/start/:game', function(req, res){
-    var gameID = req.params.game;
-    if (games[gameID].gameStatus == "In Play"){
-        res.json({success: true, message: "In Play", grid: games[gameID].board.letters});
+    var game = req.params.game;
+    if (game.gameStatus == "In Play"){
+        res.json({success: true, message: "In Play", grid: game.board.letters});
     }
     else{
         res.json({success: false, message: "Waiting", grid: null});
