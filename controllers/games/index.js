@@ -3,12 +3,11 @@ router = express.Router(),
 path = require('path'),
 make = require('../../lib/idGenerator');
 
+var testSearch = require('../../lib/searchMethodBenchmark');
+
 var gameModels = require("../../models/games");
 
 var Words = require("../../models/words");
-// Build routes For Game Actions
-// Start By sending a validated board
-// The game admin
 
 // ----------------------------------------
 // Need to Either call it gameKey or gameID
@@ -16,6 +15,7 @@ var Words = require("../../models/words");
 
 // Fake DB For Development
 var games = {};
+
 
 router.param('game', function(req,res,next,id){
     // This Is Where you would hit the DB To Locate The Game
@@ -28,6 +28,19 @@ router.param('game', function(req,res,next,id){
         next();
     }
 });
+// This stuff Might be done in order of occurrence in the url
+// router.param('player', function(req,res,next,id){
+//     // This Is Where you would hit the DB To Locate The Game
+//     if (!req.params.game){
+//         res.status(404).send({error:"Game Not Found."});
+//         return;
+//     }
+//     else{
+//         // needs player obj
+//         if (req.params.game.isPlayer(player)) req.params.player ...;
+//         next();
+//     }
+// });
 
 router.post('/create', function(req, res){
     // Authentication Middleware Here
@@ -40,12 +53,14 @@ router.post('/create', function(req, res){
     // create game
     // ------------------------------------------------ 
     games[gameID] = new gameModels.game(admin, new gameModels.board());
-
-    (function repeater(game){ 
-        Words.startsWith(game.setup(), function(err, docs){
-            if (!games[gameID].validateBoard(gameModels.search, docs)) repeater(game.setup());
-        });
-    })(games[gameID]);
+    //Test Validation Speed 
+    testSearch.repeat(games[gameID],gameModels.search);
+    
+    // (function repeater(game){
+    //     Words.startsWith(game.setup(), function(err, docs){
+    //         if (!games[gameID].validateBoard(gameModels.search, docs)) repeater(game.setup());
+    //     });
+    // })(games[gameID]);
 });
 
 // Not Sure If This Will be The Set Up
@@ -67,25 +82,17 @@ router.post('/join', function(req, res){
     }
 
     games[gameID].joinGame(newPlayer);
-    res.redirect('/games/join/' + gameID + '/' + newPlayer.key);
+    res.redirect('/games/join/' + gameID + '/' + newPlayer.key + '/' + nickname);
 });
 
-router.get('/join/:game/:player', function(req, res){
-    // The Db will probably do that
+router.get('/join/:game/:player/:nickname', function(req, res){
     var game = req.params.game;
+    var player = gameModels.Player(req.params.nickname, req.params.player);
 
-    var playerKey = req.params.player;
-    var count = game.players.length;
-    var joined = false;
-    
-    for (var i = 0; i < count; i++){
-        if (playerKey == game.players[i].key){
-            res.json({'registered': true,'playerID': playerKey,'nickname': game.players[i].nickname});
-            joined = true;
-            break;
-        }
+    if (game.isPlayer(player)){
+        res.json({'registered': true,'playerID': player.key,'nickname': player.nickname});
     }
-    if (!joined){
+    else{
         res.json({'registered': false});
     }
 });
@@ -102,11 +109,12 @@ router.post('/start', function(req, res){
         res.status(404).send({error:"Game Not Found."});
         return;
     }
-    // ----------------------------------------
-
+    // ---------------------------------------- 
     if (games[gameID].admin.key == playerID){
         games[gameID].gameStatus = "In Play";
+        games[gameID].currentTurn = (Math.random()*games[gameID].players.length)|0;
     }
+    // ^^^^^^This Should be a WordSearch prototype^^^^^^
     res.redirect('/games/start/' + gameID);
 });
 

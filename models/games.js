@@ -1,21 +1,11 @@
-// Players Need 
-// PlayerID
-// Nickname
-// Score 
-// GameID
 function Player(nickname, key){
     this.nickname = nickname;
     this.key = key;
     this.gameKey;
     this.score = 0;
 }
-Player.prototype.compare = function(player){
-    // Could add gameKey
-    if (this.nickname == player.nickname) return true;
-    if (this.key == player.key) return true;
-}
 
-function Game(admin, board){
+function WordSearch(admin, board){
     this.admin = admin;
     this.gameKey = admin.gameKey;
     this.currentTurn = 0;
@@ -27,12 +17,12 @@ function Game(admin, board){
     // "Building","Waiting","In Play","Complete"
     this.gameStatus = "Building";
 }
-Game.prototype.setup = function(){
+WordSearch.prototype.setup = function(){
     // Wow Game Class Is Tangled as Hell
     this.board.setup();
     return Object.keys(this.board.letterIndex);
 }
-Game.prototype.validateBoard = function(searcher, wordList){
+WordSearch.prototype.validateBoard = function(searcher, wordList){
     // returns True or False
     var validator = new searcher(this.board);
     var limit = wordList.length;
@@ -46,7 +36,7 @@ Game.prototype.validateBoard = function(searcher, wordList){
     this.gameStatus = "Waiting";
     return true;
 }
-Game.prototype.checkGuess = function(playerKey, guess){
+WordSearch.prototype.checkGuess = function(playerKey, guess){
     if (playerKey != this.players[this.currentTurn].key) return false;
     var player = this.players[this.currentTurn];
     // guess = {'word': guess word string,'coordinates':guess coordinates array}
@@ -78,26 +68,36 @@ Game.prototype.checkGuess = function(playerKey, guess){
     }
     return false;
 }
-Game.prototype.endTurn = function(){
+WordSearch.prototype.endTurn = function(){
     // if(!this.endGame())
     this.currentTurn += 1;
     this.currentTurn %= this.players.length;
 }
-Game.prototype.pass = function(){
+WordSearch.prototype.pass = function(){
     this.consecutivePasses += 1;
     // if ((this.players.length == this.consecutivePasses) this.gameOver();
     this.endTurn();
 }
-Game.prototype.joinGame = function(user){
+WordSearch.prototype.isPlayer = function(user){
     var count = this.players.length;
-    // Validate Uniqueness
     for (var i = 0; i < count; i++){
-        if (user.compare(this.players[i])) return false;
+        if (user.key == this.players[i].key && user.nickname == this.players[i].nickname){
+            return true;
+        }
+    }
+    return false;
+}
+WordSearch.prototype.joinGame = function(user){
+    var count = this.players.length;
+    for (var i = 0; i < count; i++){
+        if(user.key == this.players[i].key || user.nickname == this.players[i].nickname){
+            return false;
+        }
     }
     this.players.push(user);
     return true
 }
-Game.prototype.endGame = function(){
+WordSearch.prototype.endGame = function(){
     if ((this.players.length == this.consecutivePasses) || (this.foundWords.length == this.board.answers.length)){
         return true;
     }else{
@@ -107,7 +107,7 @@ Game.prototype.endGame = function(){
     // Putting them Here makes it easy to Add more conditions that terminate the game
     // Making this an object would make the Game more Flexible
 }
-// Game.prototype.quitGame = function(username) {
+// WordSearch.prototype.quitGame = function(username) {
     
 //     var index = this.players.indexOf(username);
 //     if(!(~index)) return false;
@@ -121,16 +121,7 @@ Game.prototype.endGame = function(){
 //         return true;
 //     }
 // }
-// Possibly Make A prototype for Game Start
-// -At Game start this would preform all of the setup
-// ---validating board
-// ---figuring out Who is in the game
 
-// Game Start Prototype
-// ---Randomize Player Order * Optional
-// ---Create And Validate Game Board ** This Would be a Single method Call
-// **-->^^This method would set the Value of the checkGuess Function
-// **-->^^Also Sets the value of this.letters << this.letters is just the letters array
 // -----------------------------------------
 // I need a Prototype that Returns Game State
 
@@ -166,9 +157,12 @@ function Search(board){
 Search.prototype.locate = function(wordObj){
     // Temporary Fix Words will Be entered in db in UpperCase
     var word = wordObj['word'].toUpperCase();
-    if (!this.board.letterIndex.hasOwnProperty(word[0])){
-        return false;
-    }
+    // if (!this.board.letterIndex.hasOwnProperty(word[0])){
+    //     return false;
+    // }
+    // if(word.length > this.board.letters.length || word.length > this.board.letters[0].length){
+    //     return false;
+    // }
     var numberOfOccurrences = this.board.letterIndex[word[0]].length;
     for (var i = 0; i < numberOfOccurrences; i++){
         var currentLetter = this.board.letterIndex[word[0]][i];
@@ -183,66 +177,79 @@ Search.prototype.checkSurround = function(cooordinate, word){
     var restOfWord = word.length - 1;
 
     var findWord = function(row, column){
-        // Optimizes Search
+        var answerCoordinates = [startObj['index']]
         //----------------------------------------
-        var sR1 = startObj['index'][0]+(row * 1),
-        sC1 = startObj['index'][1]+(column * 1),
-        sR2 = startObj['index'][0]+(row * 2),
-        sC2 = startObj['index'][1]+(column * 2),
-        sR3 = startObj['index'][0]+(row * 3),
-        sC3 = startObj['index'][1]+(column * 3);
-
-        var secondLetter = grid[sR1][sC1]['letter'],
-        thirdLetter = grid[sR2][sC2]['letter'],
-        fourthLetter = grid[sR3][sC3]['letter'];
-
-        if (secondLetter + thirdLetter + fourthLetter != word.substring(1,4)) return false;
-
-        var answerCoordinates = [startObj['index'].join(","),[sR1,sC1].join(","),[sR2,sC2].join(","),[sR3,sC3].join(",")];
-        //----------------------------------------
-
-        for(var index = 4; index < restOfWord+1; index++){
+        for(var index = 1; index <= restOfWord; index++){
             checkRow = startObj['index'][0]+(row * index);
             checkColumn = startObj['index'][1]+(column * index);
             if(word[index] != grid[checkRow][checkColumn]['letter']){
                 return false;
             }else{
-                answerCoordinates.push([checkRow,checkColumn].join(","));
+                answerCoordinates.push([checkRow,checkColumn]);
             }
         }
-        if(answerCoordinates.length == restOfWord+1){
+        answerLength = answerCoordinates.length
+        if(answerLength == restOfWord+1){
+            for (var idx = 0;idx < answerLength; idx++){
+                answerCoordinates[idx]=answerCoordinates[idx].join(",");
+            }
             this.board.answers.push({'word':word, 'coordinates':answerCoordinates});
             return true;
         }
     }
 
     if (startObj['index'][1]-restOfWord >= 0){
-        findWord.call(this,0,-1)
-    }
-    if (startObj['index'][0]-restOfWord >= 0 && startObj['index'][1]-restOfWord >= 0){
-        findWord.call(this,-1,-1)
-    }
-    if (startObj['index'][0]-restOfWord >= 0){
-        findWord.call(this,-1,0);
-    }
-    if (startObj['index'][0]-restOfWord >= 0 && startObj['index'][1]+restOfWord < numberOfColumns){
-        findWord.call(this,-1,1);
+        findWord.call(this,0,-1);
     }
     if (startObj['index'][1]+restOfWord < numberOfColumns){
         findWord.call(this,0,1);
     }
-    if (startObj['index'][0]+restOfWord < numberOfRows && startObj['index'][1]+restOfWord < numberOfColumns){
-        findWord.call(this,1,1);
+    if (startObj['index'][0]-restOfWord >= 0){
+        findWord.call(this,-1,0);
+        if (startObj['index'][1]-restOfWord >= 0){
+            findWord.call(this,-1,-1);
+        }
+        if (startObj['index'][1]+restOfWord < numberOfColumns){
+            findWord.call(this,-1,1);
+        }
     }
     if (startObj['index'][0]+restOfWord < numberOfRows){
         findWord.call(this,1,0);
-    }
-    if (startObj['index'][0]+restOfWord < numberOfRows && startObj['index'][1]-restOfWord >= 0){
-        findWord.call(this,1,-1);
+        if (startObj['index'][1]+restOfWord < numberOfColumns){
+            findWord.call(this,1,1);
+        }
+        if (startObj['index'][1]-restOfWord >= 0){
+            findWord.call(this,1,-1);
+        }
     }
 }
 
-module.exports = {'Player': Player,'game': Game, 'board': Board, 'search': Search};
+module.exports = {'Player': Player,'game': WordSearch, 'board': Board, 'search': Search};
+    // if (startObj['index'][1]-restOfWord >= 0){
+    //     // Row Column
+    //     findWord.call(this,0,-1)
+    // }
+    // if (startObj['index'][0]-restOfWord >= 0 && startObj['index'][1]-restOfWord >= 0){
+    //     findWord.call(this,-1,-1)
+    // }
+    // if (startObj['index'][0]-restOfWord >= 0){
+    //     findWord.call(this,-1,0);
+    // }
+    // if (startObj['index'][0]-restOfWord >= 0 && startObj['index'][1]+restOfWord < numberOfColumns){
+    //     findWord.call(this,-1,1);
+    // }
+    // if (startObj['index'][1]+restOfWord < numberOfColumns){
+    //     findWord.call(this,0,1);
+    // }
+    // if (startObj['index'][0]+restOfWord < numberOfRows && startObj['index'][1]+restOfWord < numberOfColumns){
+    //     findWord.call(this,1,1);
+    // }
+    // if (startObj['index'][0]+restOfWord < numberOfRows){
+    //     findWord.call(this,1,0);
+    // }
+    // if (startObj['index'][0]+restOfWord < numberOfRows && startObj['index'][1]-restOfWord >= 0){
+    //     findWord.call(this,1,-1);
+    // }
 
 if(!module.parent){
     // TESTS Should Replace This
