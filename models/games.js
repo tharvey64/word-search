@@ -175,8 +175,9 @@ Search.prototype.checkSurround = function(cooordinate, word){
     var numberOfColumns = grid[0].length;
     var numberOfRows = grid.length;
     var restOfWord = word.length - 1;
+    var success = false;
 
-    var findWord = function(row, column){
+    var findWord = function (row, column){
         var answerCoordinates = [startObj['index']]
         //----------------------------------------
         for(var index = 1; index <= restOfWord; index++){
@@ -194,10 +195,10 @@ Search.prototype.checkSurround = function(cooordinate, word){
                 answerCoordinates[idx]=answerCoordinates[idx].join(",");
             }
             this.board.answers.push({'word':word, 'coordinates':answerCoordinates});
+            success = true;
             return true;
         }
     }
-
     if (startObj['index'][1]-restOfWord >= 0){
         findWord.call(this,0,-1);
     }
