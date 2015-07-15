@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Word Search</title>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
+    <script src="base.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="base.css">
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      
+      <div id="createGame">
+        <form id="createGameForm" action="/games/create">
+          <h3>Create Game</h3>
+          <p>Select your opponents.</p>
+          <select id="userList" multiple></select>
+          <input type="hidden" name="nickname">
+          <input type="submit" value="Submit">
+        </form>
+      </div>
+
+      <div id="chat">
+        <ul id="messages"></ul>
+        <form id="messageForm" action="">
+          <input id="m" autocomplete="off"><button>Send</button>
+        </form>
+      </div>
+
+    </div>
+  </body>
+  <script id="gameInviteTemplate" type="x-tmpl-mustache">
+    <form id="gameInvitationForm" action="/games/join" method="POST">
+      <input type="hidden" name="nickname" value={{ nickname }}>
+      <input type="hidden" name="gameID" value={{ gameID }}>
+      <input type="submit" value="Join">
+    </form>
+  </script>
+<!-- Move This -->
+  <script id="startGameTemplate" type="x-tmpl-mustache">
+    <form id="startGameForm" action="/games/start" method="POST">
+      <input type="hidden" name="playerID" value={{ playerID }}>
+      <input type="hidden" name="gameID" value={{ gameID }}>
+      <input type="submit" value="Start Game">
+    </form>
+  </script>
+  <script id="refreshGameTemplate" type="x-tmpl-mustache">
+    <form id="refreshGameForm" action="/games/info" method="POST">
+      <input type="hidden" name="playerID" value={{ playerID }}>
+      <input type="hidden" name="gameID" value={{ gameID }}>
+      <input type="submit" value="Refresh">
+    </form>
+  </script>
+  <script id="guessTemplate" type="x-tmpl-mustache">
+    <form id="guessForm" action="/games/play" method="POST">
+      <input type="text" name="guess" value="">
+      <input type="hidden" name="playerID" value={{ playerID }}>
+      <input type="hidden" name="gameID" value={{ gameID }}>
+      <input type="submit" value="Play">
+    </form>
+  </script>
+</html>
