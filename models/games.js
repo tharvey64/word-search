@@ -18,7 +18,6 @@ function WordSearch(admin, board){
     this.gameStatus = "Building";
 }
 WordSearch.prototype.setup = function(){
-    // Wow Game Class Is Tangled as Hell
     this.board.setup();
     return Object.keys(this.board.letterIndex);
 }
@@ -97,6 +96,23 @@ WordSearch.prototype.joinGame = function(user){
     this.players.push(user);
     return true
 }
+WordSearch.prototype.turnSequence = function(){
+    var numberOfPlayers = this.players.length;
+    var sequence = [];
+    for(var i = 0; i < numberOfPlayers; i++){
+        var idx = (this.currentTurn + i) % numberOfPlayers;
+        sequence.push(this.players[idx].nickname);
+    }
+    return sequence;
+}
+WordSearch.prototype.scores = function(){
+    var numberOfPlayers = this.players.length;
+    var scoreHash = {};
+    for(var i = 0; i < numberOfPlayers; i++){
+        scoreHash[this.players[i].nickname] = this.players[i].score;
+    }
+    return scoreHash;
+}
 WordSearch.prototype.endGame = function(){
     if ((this.players.length == this.consecutivePasses) || (this.foundWords.length == this.board.answers.length)){
         return true;
@@ -157,6 +173,7 @@ function Search(board){
 Search.prototype.locate = function(wordObj){
     // Temporary Fix Words will Be entered in db in UpperCase
     var word = wordObj['word'].toUpperCase();
+    // Words Will Already Be First Letter Verified
     // if (!this.board.letterIndex.hasOwnProperty(word[0])){
     //     return false;
     // }
@@ -175,7 +192,6 @@ Search.prototype.checkSurround = function(cooordinate, word){
     var numberOfColumns = grid[0].length;
     var numberOfRows = grid.length;
     var restOfWord = word.length - 1;
-    var success = false;
 
     var findWord = function (row, column){
         var answerCoordinates = [startObj['index']]
@@ -195,7 +211,6 @@ Search.prototype.checkSurround = function(cooordinate, word){
                 answerCoordinates[idx]=answerCoordinates[idx].join(",");
             }
             this.board.answers.push({'word':word, 'coordinates':answerCoordinates});
-            success = true;
             return true;
         }
     }
