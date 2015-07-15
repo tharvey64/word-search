@@ -28,7 +28,6 @@ router.param('game', function(req,res,next,id){
         next();
     }
 });
-// This stuff Might be done in order of occurrence in the url
 // router.param('player', function(req,res,next,id){
 //     // This Is Where you would hit the DB To Locate The Game
 //     if (!req.params.game){
@@ -49,26 +48,28 @@ router.post('/create', function(req, res){
 
     var gameID = make.key();
     admin.gameKey = gameID;
+    // Put the gameID,nickname,and player key in the res body
     res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.key);
     // create game
     // ------------------------------------------------ 
     games[gameID] = new gameModels.game(admin, new gameModels.board());
     //Test Validation Speed 
-    testSearch.repeat(games[gameID],gameModels.search);
-    
-    // (function repeater(game){
-    //     Words.startsWith(game.setup(), function(err, docs){
-    //         if (!games[gameID].validateBoard(gameModels.search, docs)) repeater(game.setup());
-    //     });
-    // })(games[gameID]);
+    // testSearch.repeat(games[gameID],gameModels.search);
+
+    (function repeater(game){
+        Words.startsWith(game.setup(), function(err, docs){
+            if (!games[gameID].validateBoard(gameModels.search, docs)) repeater(game.setup());
+        });
+    })(games[gameID]);
 });
 
-// Not Sure If This Will be The Set Up
 router.get('/create/:game/:nickname/:player', function(req, res){
+    // Redirect To Waiting Lobby
     var game = req.params.game;
     var nickname = req.params.nickname;
     var player = req.params.player;
-    res.json({'player': player, 'nickname': nickname, 'game': game.gameKey});
+    // send html back 
+    res.json({'playerID': player, 'nickname': nickname, 'gameID': game.gameKey});
 });
 
 router.post('/join', function(req, res){
@@ -77,8 +78,8 @@ router.post('/join', function(req, res){
     var newPlayer = new gameModels.Player(nickname, make.key());
 
     if (!games[gameID]){
-        res.status(404).send({error:"Game Not Found."});
-        return;
+        res.status(404).send({'error':"Game Not Found."});
+        return false;
     }
 
     games[gameID].joinGame(newPlayer);
@@ -87,10 +88,10 @@ router.post('/join', function(req, res){
 
 router.get('/join/:game/:player/:nickname', function(req, res){
     var game = req.params.game;
-    var player = gameModels.Player(req.params.nickname, req.params.player);
-
+    var player = new gameModels.Player(req.params.nickname, req.params.player);
     if (game.isPlayer(player)){
         res.json({'registered': true,'playerID': player.key,'nickname': player.nickname});
+        // Redirect To Waiting Lobby
     }
     else{
         res.json({'registered': false});
@@ -106,8 +107,8 @@ router.post('/start', function(req, res){
     // ----------------------------------------
     // This Should be middleware use app.use
     if (!games[gameID]){
-        res.status(404).send({error:"Game Not Found."});
-        return;
+        res.status(404).send({'error':"Game Not Found."});
+        return false;
     }
     // ---------------------------------------- 
     if (games[gameID].admin.key == playerID){
@@ -121,35 +122,32 @@ router.post('/start', function(req, res){
 router.get('/start/:game', function(req, res){
     var game = req.params.game;
     if (game.gameStatus == "In Play"){
-        res.json({success: true, message: "In Play", grid: game.board.letters});
+        res.json({'success': true, 'message': "In Play", 'grid': game.board.letters});
     }
     else{
-        res.json({success: false, message: "Waiting", grid: null});
+        res.json({'success': false, 'message': "Waiting", 'grid': null});
     }
 });
 
 // Temporary Url
-router.get('/info', function(req, res){
-    var gameID = req.body.gameID;
-    var playerID = req.body.playerID;
-    // turnSeq is the perfect example had i maintained the old unshit and push 
-    // turnSeq would have been simple
-    // {
-    //     gameStatus:games[gameID].gameStatus,
-    //     currentPlayer: games[gameID].players[games[gameID].currentTurn],
-    //     turnSeq: (games[gameID].players.slice(games[gameID].currentTurn) + games[gameID].players.slice(0,games[gameID].currentTurn)).join(","),
-    //     wordsDone:games[gameID].board.foundWords,
-    //     scores:hash of nicknames and scores, 
-    //     grid: games[gameID].board.letters
-    // }
-    // needs game key 
-    // Info will show all the current state of the game
-    // Socket will have an emit('game state changed') which
-    // will prompt all sockets to call this route
+router.get('/info/:game', function(req, res){
+    var game = req.params.game;
+    var player = new gameModels.Player(req.query.nickname,req.query.player);
+    if (!game.isPlayer(player)){
+        res.status(404).send({'error':"Invalid Player."});
+        return false;
+    }
+    // This Is Everything In the Specs 
+    res.json({
+        'gameStatus':game.gameStatus,
+        'currentPlayer': game.players[game.currentTurn].nickname,
+        'turnSeq': game.turnSequence(),
+        'wordsDone':game.board.foundWords,
+        'scores': game.scores(),
+        'grid': game.board.letters
+    });
 });
 
-// User Guess 
-// If It is valid it does update the Game so post
 router.post('/play', function(req, res){
     // the request body will have the guess, gameKey, playerKey
     // needs a game key or id and turn confirmation
