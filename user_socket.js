@@ -17,19 +17,22 @@ exports.live = function(tempIO){
         });
 
         socket.on('newGame',function(users, gameId){
+            // Create Game Route
             // This game desperatly needs a db
             for(i=0; i < users.length; i++){
                 socket.broadcast.to(connected[users[i]]).emit('gameInvitation', gameId);
             }
         });
 
-        socket.on('join game', function(gameId){
-            socket.join(gameId);
-            socket.to(gameId).emit('chat message', name + " Joined Game");
+        socket.on('join game', function(gameID){
+            // Join Game Route
+            socket.join(gameID);
+            socket.to(gameID).emit('chat message', name + " Joined Game");
         });
 
-        socket.on('start game', function(board, gameId){
-            tempIO.to(gameId).emit('start game', board);
+        socket.on('get game state', function(gameID){
+            tempIO.to(gameID).emit('get game state', gameID);
+            tempIO.to(gameID).emit('chat message', "Game Starting");
         });
 
         socket.on('chat message', function(msg){
