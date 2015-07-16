@@ -1,35 +1,35 @@
 <div id="gameInterface">
-    <div class="col-lg-8 pull-left" id="grid">
+    <div class="col-lg-8 pull-left jumbotron" id="grid">
         <!-- <h2>Grid</h2> -->
         <table class="table table-condensed">
             <tbody>
                 {{#grid}}
-                <tr>{{#.}}<td><button class="btn btn-success btn-block" name="{{index}}">{{letter}}</button></td>{{/.}}</tr>
+                <tr>{{#.}}<td><button class="letter btn btn-success btn-block" name="{{index}}">{{letter}}</button></td>{{/.}}</tr>
                 {{/grid}}
             </tbody>
         </table>
     </div>
-    <div class="col-md-4 pull-right" id="gameData">
+    <div class="col-md-4 pull-right panel-default" id="gameData">
         <div id="playerList">
-            <h2>Player List</h2>
+            <h2 class="label label-primary">Player List</h2>
             <p>{{gameStatus}}</p>
             <p class="lead">{{currentPlayer}}</p>
             <ol>
                 {{#turnSeq}}
-                <li>{{.}}</li>
+                <li class="list-unstyled list-group-item list-group-item-info">{{.}}</li>
                 {{/turnSeq}}
             </ol>
         </div>
         <div id="scores">
-            <h2>Leader Board</h2>
-            <ul class="list-unstyled">
+            <h2 class="label label-primary">Leader Board</h2>
+            <ul class="list-unstyled list-group-item list-group-item-info">
                 {{#order}}
                 <li>{{name}}: {{score}}</li>
                 {{/order}}
             </ul>
         </div>
         <div id="foundWords">
-            <h2>Words Found</h2>
+            <h2 class="label label-primary">Words Found</h2>
             <ol>
                 {{#wordsDone}}
                 <li>{{.}}</li>

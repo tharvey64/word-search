@@ -3,8 +3,6 @@ function buildBoard(game, player, nickname){
 		var template = data;
 		Mustache.parse(template);
 		$.get('/games/info/' + game, {'player': player, 'nickname': nickname}, function(data){
-			// Change Process The Data
-			// Current Turn Should be larger Than rest turn order
 			var players = [],
 			numberOfPlayers = data.turnSeq.length; 
 			for (i=0;i<numberOfPlayers;i++){
@@ -29,6 +27,7 @@ $(document).ready(function(){
 	// Edit Here
 	$("#createGameForm input[name='nickname']").val(nickname);
 	
+	// Confirm Username Has Not Been Taken
 	socket.on('userName taken', function(name){
 		// Make This Happen on success or failure
 		// Loop until success
@@ -37,11 +36,11 @@ $(document).ready(function(){
 		$("#createGameForm input[name='nickname']").val(nickname);
 	});
 
-	// Socket Chat
+	// Recieving Chat Message
 	socket.on('chat message', function(msg){
 		$('#messages').append($('<li>').text(msg));
 	});
-	// Message Send
+	// Message Sending
 	$('#messageForm').on('submit', function(event){
 		event.preventDefault();
 		var message = this.elements.m.value;

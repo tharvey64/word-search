@@ -94,7 +94,7 @@ WordSearch.prototype.joinGame = function(user){
         }
     }
     this.players.push(user);
-    return true
+    return true;
 }
 WordSearch.prototype.turnSequence = function(){
     var numberOfPlayers = this.players.length;
@@ -117,7 +117,7 @@ WordSearch.prototype.endGame = function(){
     if ((this.players.length == this.consecutivePasses) || (this.foundWords.length == this.board.answers.length)){
         return true;
     }else{
-        return false
+        return false;
     }
     // These Two Conditions can be checked elsewhere
     // Putting them Here makes it easy to Add more conditions that terminate the game
