@@ -1,7 +1,44 @@
-<table class="table">
-    <tbody>
-        {{#board}}
-        <tr>{{#.}}<td><button>{{letter}}{{index}}</button></td>{{/.}}</tr>
-        {{/board}}
-    </tbody>
-</table>
+<div id="gameInterface">
+    <div class="col-lg-8 pull-left" id="grid">
+        <!-- <h2>Grid</h2> -->
+        <table class="table table-condensed">
+            <tbody>
+                {{#grid}}
+                <tr>{{#.}}<td><button class="btn btn-success btn-block" name="{{index}}">{{letter}}</button></td>{{/.}}</tr>
+                {{/grid}}
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-4 pull-right" id="gameData">
+        <div id="playerList">
+            <h2>Player List</h2>
+            <p>{{gameStatus}}</p>
+            <p class="lead">{{currentPlayer}}</p>
+            <ol>
+                {{#turnSeq}}
+                <li>{{.}}</li>
+                {{/turnSeq}}
+            </ol>
+        </div>
+        <div id="scores">
+            <h2>Leader Board</h2>
+            <ul class="list-unstyled">
+                {{#order}}
+                <li>{{name}}: {{score}}</li>
+                {{/order}}
+            </ul>
+        </div>
+        <div id="foundWords">
+            <h2>Words Found</h2>
+            <ol>
+                {{#wordsDone}}
+                <li>{{.}}</li>
+                {{/wordsDone}}
+                {{^wordsDone}}
+                <li>No Words Found</li>
+                {{/wordsDone}}
+
+            </ol>
+        </div>
+    </div>
+</div>

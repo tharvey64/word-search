@@ -1,45 +1,70 @@
-function buildBoard(gameId){
-	$.get('/game/board', function(data){
+function buildBoard(game, player, nickname){
+	$.get('/games/board', function(data){
 		var template = data;
 		Mustache.parse(template);
-		$.get('/game/letters', function(data){
+		$.get('/games/info/' + game, {'player': player, 'nickname': nickname}, function(data){
+			// Change Process The Data
+			// Current Turn Should be larger Than rest turn order
+			var players = [],
+			numberOfPlayers = data.turnSeq.length; 
+			for (i=0;i<numberOfPlayers;i++){
+				var p = {'name': data.turnSeq[i], 'score': data.scores[data.turnSeq[i]]}
+				players.push(p);
+			}
+			// cant really test this until play route works
+			players.sort(function(a,b){
+				return b.score - a.score
+			});
+			data['order'] = players;
 			var board = Mustache.render(template, data);
-			socket.emit('start game', board, gameId);
+			$('#createGame').html(board);
 		});
 	});
 }
-
 $(document).ready(function(){
 	var nickname = prompt("Please enter a username:");
 	var socket = io();
-	var games = 0;
-	var sessionId;
-	
+	var playerID;
 	socket.emit('userName', nickname);
-
+	// Edit Here
+	$("#createGameForm input[name='nickname']").val(nickname);
+	
 	socket.on('userName taken', function(name){
+		// Make This Happen on success or failure
+		// Loop until success
 		nickname = prompt(name + " has already been taken. Please enter a different username:");
 		socket.emit('userName', nickname);
+		$("#createGameForm input[name='nickname']").val(nickname);
 	});
 
-	// Replace this with something else
-	socket.on('sessionId', function(id){
-		sessionId = id;
+	// Socket Chat
+	socket.on('chat message', function(msg){
+		$('#messages').append($('<li>').text(msg));
 	});
+	// Message Send
+	$('#messageForm').on('submit', function(event){
+		event.preventDefault();
+		var message = this.elements.m.value;
+		// Message Appended To Submiters Screen
+		var item = $('<li>')
+		item.attr("class","sentMessage");
+		$('#messages').append(item.text("Me: " + message));
 
+		socket.emit('chat message', nickname + ": " + message);
+	});
+	// Socket Game 
+	// socket.on('start game', function(gameID){
+	// 	$('#createGame').html(gameBoard);
+	// });
 	socket.on('start game', function(gameBoard){
 		$('#createGame').html(gameBoard);
 	});
 
-	socket.on('gameInvitation', function(gameId){
+	socket.on('gameInvitation', function(gameID){
 		var template = $('#gameInviteTemplate').html();
 		Mustache.parse(template);
-		var rendered = Mustache.render(template, {'gameId':gameId});
+		var rendered = Mustache.render(template, {'gameID':gameID,'nickname':nickname});
 		$('#messages').append(rendered);
-	});
-
-	socket.on('chat message', function(msg){
-		$('#messages').append($('<li>').text(msg));
 	});
 
 	socket.on('sendUsers', function(connected){
@@ -51,41 +76,51 @@ $(document).ready(function(){
 		}
 	});
 
-	$('#createGameForm').on('submit', function(){
-		var notifyUsers = $('#userList').val() || [];
-		games += 1;
-		var gameId = sessionId + String(games);
-		socket.emit('newGame', notifyUsers, gameId);
-		socket.emit('join game', gameId);
-		$('#createGame').html("<button id='startGame' name='" + gameId + "'>Start</button>");
-		return false
-	});
-	
-	$('#chat').on('submit', '#gameInvitationForm', function(event){
+	$('#createGameForm').on('submit', function(event){
 		event.preventDefault();
-		var room = $("input[name='gameNumber']").val();
-		socket.emit('join game', room);
-		$('#createGame').html("Waiting For Game To Start....");
-		$('#messages').html("");
-	});
-
-	$('#createGame').on('click', '#startGame',function(){
-		var gameId = sessionId + String(games);
+		var notifyUsers = $('#userList').val() || [];
 		
-		$.get('/game/board', function(data){
-			var template = data;
+		$.post("games/create/",$(this).serialize(), function(data){
+			// This Should Be a Redirect
+			var template = $('#startGameTemplate').html();
 			Mustache.parse(template);
-			$.get('/game/letters', function(data){
-				var board = Mustache.render(template, data);
-				socket.emit('start game', board, gameId);
-			});
+			var rendered = Mustache.render(template, data);
+			$('#createGame').html(rendered);
+			playerID = data.playerID
+			socket.emit('newGame', notifyUsers, data.gameID);
+			socket.emit('join game', data.gameID);
 		});
 	});
+	// Player Joins A Game
+	// Should Redirect Player To Game Lobby
+	$('#chat').on('submit', '#gameInvitationForm', function(event){
+		event.preventDefault();
+		var room = this.elements.gameID.value
+		$.post("/games/join", $(this).serialize(), function(data){
+			if (data.registered){
+				playerID = data.playerID
+				console.log("Joining");
+				socket.emit('join game', room);
+				$('#createGame').html("Waiting For Game To Start....");
+				$('#messages').html("");
+			}
+		});
+		// Join The Game And Redirect To Waiting Room
+	});
 
-	$('#messageForm').on('submit', function(){
-		$('#messages').append($('<li>').text($('#m').val()));
-		socket.emit('chat message', $('#m').val());
-		$('#m').val('');
-		return false;
+	// Move This To Game Lobby
+	$('#createGame').on('submit', '#startGameForm',function(event){
+		event.preventDefault();
+		var gameID = this.elements.gameID.value
+		$.post('/games/start/',$(this).serialize(),function(data){
+			if (!data.success){
+				return false;
+			}
+			// socket event to update game
+			socket.emit('get game state', gameID);
+		});
+	});
+	socket.on('get game state', function(gameID){
+		buildBoard(gameID, playerID, nickname);
 	});
 });
