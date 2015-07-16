@@ -1,7 +1,7 @@
 <div id="gameInterface">
     <div class="col-lg-8 pull-left" id="grid">
-        <h2>Grid</h2>
-        <table class="table">
+        <!-- <h2>Grid</h2> -->
+        <table class="table table-condensed">
             <tbody>
                 {{#grid}}
                 <tr>{{#.}}<td><button class="btn btn-success btn-block" name="{{index}}">{{letter}}</button></td>{{/.}}</tr>
@@ -9,11 +9,11 @@
             </tbody>
         </table>
     </div>
-    <div class="col-lg-4 pull-right" id="gameData">
+    <div class="col-md-4 pull-right" id="gameData">
         <div id="playerList">
             <h2>Player List</h2>
-            <p>{{currentPlayer}}</p>
-            <p>{{gameStatue}}</p>
+            <p>{{gameStatus}}</p>
+            <p class="lead">{{currentPlayer}}</p>
             <ol>
                 {{#turnSeq}}
                 <li>{{.}}</li>
@@ -21,15 +21,15 @@
             </ol>
         </div>
         <div id="scores">
-            <h2>Scores</h2>
-            <ul>
-                {{#scores}}
-                <li>{{.}}</li>
-                {{/scores}}
+            <h2>Leader Board</h2>
+            <ul class="list-unstyled">
+                {{#order}}
+                <li>{{name}}: {{score}}</li>
+                {{/order}}
             </ul>
         </div>
         <div id="foundWords">
-            <h2>Word List</h2>
+            <h2>Words Found</h2>
             <ol>
                 {{#wordsDone}}
                 <li>{{.}}</li>

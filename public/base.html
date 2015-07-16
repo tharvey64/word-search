@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Word Search</title>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
     <script src="base.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"> -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <link rel="stylesheet" href="base.css">
   </head>
@@ -15,7 +18,7 @@
   <body>
     <div class="container-fluid">
       
-      <div id="createGame">
+      <div class="container-fluid" id="createGame">
         <form id="createGameForm" action="/games/create">
           <h3>Create Game</h3>
           <p>Select your opponents.</p>
@@ -25,15 +28,18 @@
         </form>
       </div>
 
-      <div id="chat">
+      <div class="container-fluid" id="chat">
         <ul id="messages"></ul>
-        <form id="messageForm" action="">
-          <input id="m" autocomplete="off"><button>Send</button>
-        </form>
       </div>
-
     </div>
   </body>
+  <footer class="footer">
+    <div class="container-fluid">
+      <form id="messageForm" action="">
+          <input id="m" autocomplete="off"><button>Send</button>
+        </form>
+    </div>
+  </footer>
   <script id="gameInviteTemplate" type="x-tmpl-mustache">
     <form id="gameInvitationForm" action="/games/join" method="POST">
       <input type="hidden" name="nickname" value={{ nickname }}>

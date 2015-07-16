@@ -1,15 +1,24 @@
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-}
 body { 
     font: 13px Helvetica, Arial; 
 }
 #grid,#gameData{
     display: inline-block;
 }
+#chat{
+    margin-bottom: 8em;
+    min-height: 5em;
+    max-height: 8em;
+    overflow: scroll;
+}
+#playerList, #foundWords, #scores{
+    border-style: solid;
+}
+.sentMessage{
+    color: green;
+}
 #messageForm { 
+    /*Find Another Way To Do This*/
+    position: fixed;
     background: #000; 
     padding: 3px;
     bottom: 0; 

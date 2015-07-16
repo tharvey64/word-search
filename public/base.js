@@ -1,45 +1,56 @@
-// This Should Be The Lobby Code 
-// When You Start A Game There should be a Redirect
 function buildBoard(game, player, nickname){
 	$.get('/games/board', function(data){
 		var template = data;
 		Mustache.parse(template);
 		$.get('/games/info/' + game, {'player': player, 'nickname': nickname}, function(data){
-			var scores = [],
+			// Change Process The Data
+			// Current Turn Should be larger Than rest turn order
+			var players = [],
 			numberOfPlayers = data.turnSeq.length; 
 			for (i=0;i<numberOfPlayers;i++){
-				scores.push(data.scores[data.turnSeq[i]]);
+				var p = {'name': data.turnSeq[i], 'score': data.scores[data.turnSeq[i]]}
+				players.push(p);
 			}
-			data.scores = scores;
+			// cant really test this until play route works
+			players.sort(function(a,b){
+				return b.score - a.score
+			});
+			data['order'] = players;
 			var board = Mustache.render(template, data);
 			$('#createGame').html(board);
 		});
 	});
 }
-// This is going to look a bit different and cleaner by tomorrow
 $(document).ready(function(){
 	var nickname = prompt("Please enter a username:");
 	var socket = io();
 	var playerID;
 	socket.emit('userName', nickname);
-
+	// Edit Here
+	$("#createGameForm input[name='nickname']").val(nickname);
+	
 	socket.on('userName taken', function(name){
+		// Make This Happen on success or failure
+		// Loop until success
 		nickname = prompt(name + " has already been taken. Please enter a different username:");
 		socket.emit('userName', nickname);
+		$("#createGameForm input[name='nickname']").val(nickname);
 	});
-	// Test What Happens When Nickname is taken
-	$("#createGameForm input[name='nickname']").val(nickname);
 
 	// Socket Chat
 	socket.on('chat message', function(msg){
 		$('#messages').append($('<li>').text(msg));
 	});
 	// Message Send
-	$('#messageForm').on('submit', function(){
-		$('#messages').append($('<li>').text($('#m').val()));
-		socket.emit('chat message', $('#m').val());
-		$('#m').val('');
-		return false;
+	$('#messageForm').on('submit', function(event){
+		event.preventDefault();
+		var message = this.elements.m.value;
+		// Message Appended To Submiters Screen
+		var item = $('<li>')
+		item.attr("class","sentMessage");
+		$('#messages').append(item.text("Me: " + message));
+
+		socket.emit('chat message', nickname + ": " + message);
 	});
 	// Socket Game 
 	// socket.on('start game', function(gameID){
