@@ -27,6 +27,7 @@ exports.live = function(tempIO){
         socket.on('join game', function(gameID){
             // Join Game Route
             socket.join(gameID);
+            // maybe this should be an html string
             socket.to(gameID).emit('chat message', name + " Joined Game");
         });
 

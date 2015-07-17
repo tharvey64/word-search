@@ -3,8 +3,6 @@ function buildBoard(game, player, nickname){
 		var template = data;
 		Mustache.parse(template);
 		$.get('/games/info/' + game, {'player': player, 'nickname': nickname}, function(data){
-			// Change Process The Data
-			// Current Turn Should be larger Than rest turn order
 			var players = [],
 			numberOfPlayers = data.turnSeq.length; 
 			for (i=0;i<numberOfPlayers;i++){
@@ -16,6 +14,9 @@ function buildBoard(game, player, nickname){
 				return b.score - a.score
 			});
 			data['order'] = players;
+			data['gameID'] = game;
+			data['playerID'] = player;
+			data['nickname'] = nickname;
 			var board = Mustache.render(template, data);
 			$('#createGame').html(board);
 		});
@@ -29,6 +30,7 @@ $(document).ready(function(){
 	// Edit Here
 	$("#createGameForm input[name='nickname']").val(nickname);
 	
+	// Confirm Username Has Not Been Taken
 	socket.on('userName taken', function(name){
 		// Make This Happen on success or failure
 		// Loop until success
@@ -37,11 +39,11 @@ $(document).ready(function(){
 		$("#createGameForm input[name='nickname']").val(nickname);
 	});
 
-	// Socket Chat
+	// Recieving Chat Message
 	socket.on('chat message', function(msg){
 		$('#messages').append($('<li>').text(msg));
 	});
-	// Message Send
+	// Message Sending
 	$('#messageForm').on('submit', function(event){
 		event.preventDefault();
 		var message = this.elements.m.value;
@@ -49,8 +51,8 @@ $(document).ready(function(){
 		var item = $('<li>')
 		item.attr("class","sentMessage");
 		$('#messages').append(item.text("Me: " + message));
-
 		socket.emit('chat message', nickname + ": " + message);
+		this.elements.m.value = "";
 	});
 	// Socket Game 
 	// socket.on('start game', function(gameID){
@@ -99,7 +101,6 @@ $(document).ready(function(){
 		$.post("/games/join", $(this).serialize(), function(data){
 			if (data.registered){
 				playerID = data.playerID
-				console.log("Joining");
 				socket.emit('join game', room);
 				$('#createGame').html("Waiting For Game To Start....");
 				$('#messages').html("");
@@ -120,6 +121,11 @@ $(document).ready(function(){
 			socket.emit('get game state', gameID);
 		});
 	});
+	// Triggered in wordSearchTurn.js
+	$('#createGame').on('endOfTurn', function(event, gameID){
+		socket.emit('get game state', gameID);
+	});
+
 	socket.on('get game state', function(gameID){
 		buildBoard(gameID, playerID, nickname);
 	});

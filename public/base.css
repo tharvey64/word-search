@@ -1,6 +1,9 @@
 body { 
     font: 13px Helvetica, Arial; 
 }
+#createGameForm select {
+    min-width: 10em;
+}
 #grid,#gameData{
     display: inline-block;
 }
@@ -10,19 +13,19 @@ body {
     max-height: 8em;
     overflow: scroll;
 }
-#playerList, #foundWords, #scores{
+/*#playerList, #foundWords, #scores{
     border-style: solid;
-}
+}*/
 .sentMessage{
     color: green;
 }
 #messageForm { 
     /*Find Another Way To Do This*/
-    position: fixed;
     background: #000; 
-    padding: 3px;
-    bottom: 0; 
-    width: 100%; 
+    position: fixed;
+    bottom: 0;
+    padding: .2em;
+    width: 100%;
 }
 #messageForm input { 
     border: 0; 
@@ -34,7 +37,7 @@ body {
     width: 9%; 
     background: rgb(130, 224, 255); 
     border: none; 
-    padding: 10px; 
+    padding: 10px;
 }
 #messages { 
     list-style-type: none; 
