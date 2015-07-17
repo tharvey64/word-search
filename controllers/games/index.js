@@ -175,9 +175,6 @@ router.post('/play', function(req, res){
             res.redirect('/games/play/' + (letters.length).toString());
         }
     }
-    // res.redirect('/play/' + );
-    // the request body will have the guess, gameKey, playerKey
-    // needs a game key or id and turn confirmation
 });
 
 router.get('/play/:score', function(req, res){
@@ -188,7 +185,7 @@ router.get('/play/:score', function(req, res){
     else{
         res.json({'success': false,'score': 0});
     }
-    // this needs success and score(round? or overall?)
+    // this needs success and score
 });
 
 router.get('/board', function(req, res){
