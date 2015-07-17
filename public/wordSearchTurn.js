@@ -22,16 +22,23 @@ $(document).ready(function(){
         validGuess = true,
         currentGuess = [],
         guessString = "",
+        validColor = false,
         letters = $('.guessSelection');
-
+        var lettersLength = letters.length;
         form.elements.guess.value = guessString;
-        if (letters.length < 4){
+        if (lettersLength == 0){
+            validColor = true;
+        }
+        else if (lettersLength < 4){
             validGuess = false;
         }
-        else if (letters.length != 0){
+        else if (lettersLength != 0){
             // Probably faster to convert to integers first and then check
             var yDiff,xDiff;
             letters.each(function(index,element){
+                if (!validColor && element.dataset.color != "btn-danger"){
+                    validColor = true;
+                }
                 guessString += $(element).html();
                 if (index != 0){
                     previous = letters[index-1].name.split(",");
@@ -62,17 +69,19 @@ $(document).ready(function(){
                 currentGuess.push(element.name);
             });
         }
-        if (!validGuess){
+        if (!validGuess || !validColor){
             // Create An Alert Box or Message Box For Invalid Guesses
             console.log("Invalid Guess.");
-            $('.guessSelection').toggleClass('btn-success btn-primary guessSelection');
+            $('.guessSelection').each(function(index,element){
+                $(element).toggleClass(element.dataset.color + ' btn-primary guessSelection');
+            });
         }
         else{
             // Submit button needs the playerID
             form.elements.guess.value = guessString;
             var gameID = form.elements.gameID.value;
             if (currentGuess.length == 0){
-                form.elements.word.value = ""
+                form.elements.word.value = "";
             }
             else{
                 form.elements.word.value = currentGuess.join(";");
