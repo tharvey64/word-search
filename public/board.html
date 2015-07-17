@@ -1,44 +1,54 @@
 <div id="gameInterface">
-    <div class="col-lg-8 pull-left jumbotron" id="grid">
-        <!-- <h2>Grid</h2> -->
-        <table class="table table-condensed">
-            <tbody>
-                {{#grid}}
-                <tr>{{#.}}<td><button class="letter btn btn-success btn-block" name="{{index}}">{{letter}}</button></td>{{/.}}</tr>
-                {{/grid}}
-            </tbody>
-        </table>
+  <div class="col-lg-8 pull-left jumbotron" id="grid">
+    <h2>{{nickname}}</h2>
+    <table class="table table-condensed">
+        <tbody>
+            {{#grid}}
+            <tr>{{#.}}<td><button class="letter btn {{color}} btn-block" name="{{index}}" data-color="{{color}}">{{letter}}</button></td>{{/.}}</tr>
+            {{/grid}}
+        </tbody>
+    </table>
+  </div>
+  <div class="col-md-4 pull-right panel panel-default" id="gameData">
+    <div class="panel-body">
+      <div id="playerListBox">
+        <p>{{gameStatus}}</p>
+        <h2 class="label label-primary">Player List</h2>
+        <p class="lead">{{currentPlayer}}</p>
+        <ol class="list-unstyled">
+          {{#turnSeq}}
+          <li class="list-group-item list-group-item-info">{{.}}</li>
+          {{/turnSeq}}
+        </ol>
+      </div>
+      <div id="scoresBox">
+        <h2 class="label label-primary">Leader Board</h2>
+        <ul class="list-unstyled">
+          {{#order}}
+          <li class="list-group-item list-group-item-info">{{name}}: {{score}}</li>
+          {{/order}}
+        </ul>
+      </div>
+      <div id="guessBox">
+        <form id="guessForm" action="/games/play" method="POST">
+          <input type="hidden" name="playerID" value="{{playerID}}">
+          <input type="hidden" name="gameID" value="{{gameID}}">
+          <input type="hidden" name="word" value="">
+          <input readonly name="guess">
+          <input type="Submit" name="wordSubmission" value="Pass">
+        </form>
+      </div>
+      <div id="foundWordsBox">
+        <h2 class="label label-primary">Words Found</h2>
+        <ol class="list-unstyled">
+          {{#wordsDone}}
+          <li class="list-group-item list-group-item-info">{{word}}</li>
+          {{/wordsDone}}
+          {{^wordsDone}}
+          <li class="list-group-item list-group-item-info">No Words Found</li>
+          {{/wordsDone}}
+        </ol>
+      </div>
     </div>
-    <div class="col-md-4 pull-right panel-default" id="gameData">
-        <div id="playerList">
-            <h2 class="label label-primary">Player List</h2>
-            <p>{{gameStatus}}</p>
-            <p class="lead">{{currentPlayer}}</p>
-            <ol>
-                {{#turnSeq}}
-                <li class="list-unstyled list-group-item list-group-item-info">{{.}}</li>
-                {{/turnSeq}}
-            </ol>
-        </div>
-        <div id="scores">
-            <h2 class="label label-primary">Leader Board</h2>
-            <ul class="list-unstyled list-group-item list-group-item-info">
-                {{#order}}
-                <li>{{name}}: {{score}}</li>
-                {{/order}}
-            </ul>
-        </div>
-        <div id="foundWords">
-            <h2 class="label label-primary">Words Found</h2>
-            <ol>
-                {{#wordsDone}}
-                <li>{{.}}</li>
-                {{/wordsDone}}
-                {{^wordsDone}}
-                <li>No Words Found</li>
-                {{/wordsDone}}
-
-            </ol>
-        </div>
-    </div>
+  </div>
 </div>

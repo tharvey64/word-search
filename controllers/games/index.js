@@ -127,6 +127,7 @@ router.get('/start/:game', function(req, res){
     else{
         res.json({'success': false, 'message': "Waiting", 'grid': null});
     }
+    console.log(game.board.answers);
 });
 
 // Temporary Url
@@ -142,20 +143,52 @@ router.get('/info/:game', function(req, res){
         'gameStatus':game.gameStatus,
         'currentPlayer': game.players[game.currentTurn].nickname,
         'turnSeq': game.turnSequence(),
-        'wordsDone':game.board.foundWords,
+        'wordsDone':game.foundWords,
         'scores': game.scores(),
         'grid': game.board.letters
     });
 });
 
 router.post('/play', function(req, res){
+    var playerID = req.body.playerID,
+    gameID = req.body.gameID,
+    coordinates = req.body.word,
+    letters = req.body.guess;
+    if (!games[gameID]){
+        res.status(404).send({'error':"Game Not Found."});
+        return false;
+    }
+    var turn = games[gameID].currentTurn;
+    if (games[gameID].players[turn].key != playerID){
+        res.redirect('/games/play/-1');
+    }
+    else if (letters.length == 0){
+        games[gameID].pass();
+        res.redirect('/games/play/0');
+    }
+    else{
+        var guess = {'word':letters,'coordinates': coordinates.split(";")}
+        if (!games[gameID].checkGuess(playerID,guess)){
+            res.redirect('/games/play/0');
+        }
+        else{
+            res.redirect('/games/play/' + (letters.length).toString());
+        }
+    }
+    // res.redirect('/play/' + );
     // the request body will have the guess, gameKey, playerKey
     // needs a game key or id and turn confirmation
 });
 
-router.get('/play', function(req, res){
+router.get('/play/:score', function(req, res){
+    var score = req.params.score;
+    if (Number(score) != -1){
+        res.json({'success': true,'score': Number(score)});
+    }
+    else{
+        res.json({'success': false,'score': 0});
+    }
     // this needs success and score(round? or overall?)
-    // needs a game key or id and turn confirmation
 });
 
 router.get('/board', function(req, res){

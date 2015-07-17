@@ -14,6 +14,9 @@ function buildBoard(game, player, nickname){
 				return b.score - a.score
 			});
 			data['order'] = players;
+			data['gameID'] = game;
+			data['playerID'] = player;
+			data['nickname'] = nickname;
 			var board = Mustache.render(template, data);
 			$('#createGame').html(board);
 		});
@@ -48,8 +51,8 @@ $(document).ready(function(){
 		var item = $('<li>')
 		item.attr("class","sentMessage");
 		$('#messages').append(item.text("Me: " + message));
-
 		socket.emit('chat message', nickname + ": " + message);
+		this.elements.m.value = "";
 	});
 	// Socket Game 
 	// socket.on('start game', function(gameID){
@@ -98,7 +101,6 @@ $(document).ready(function(){
 		$.post("/games/join", $(this).serialize(), function(data){
 			if (data.registered){
 				playerID = data.playerID
-				console.log("Joining");
 				socket.emit('join game', room);
 				$('#createGame').html("Waiting For Game To Start....");
 				$('#messages').html("");
@@ -119,6 +121,11 @@ $(document).ready(function(){
 			socket.emit('get game state', gameID);
 		});
 	});
+	// Triggered in wordSearchTurn.js
+	$('#createGame').on('endOfTurn', function(event, gameID){
+		socket.emit('get game state', gameID);
+	});
+
 	socket.on('get game state', function(gameID){
 		buildBoard(gameID, playerID, nickname);
 	});

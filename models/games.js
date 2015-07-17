@@ -36,30 +36,31 @@ WordSearch.prototype.validateBoard = function(searcher, wordList){
     return true;
 }
 WordSearch.prototype.checkGuess = function(playerKey, guess){
+    // Returning false Here is misleading
     if (playerKey != this.players[this.currentTurn].key) return false;
     var player = this.players[this.currentTurn];
     // guess = {'word': guess word string,'coordinates':guess coordinates array}
     // End There Turn And Process There Guess
     this.endTurn();
-    // This Should Prevent Multiple submissions
-
     if (this.consecutivePasses != 0) this.consecutivePasses = 0;
+    if (guess['coordinates'].length != guess['word'].length) return false;
 
-    if (guess['cooordinates'].length != guess['word'].length) return false;
-
-    var guessLength = guess['cooordinates'].length;
+    var guessLength = guess['coordinates'].length;
     var numberOfAnswers = this.board.answers.length;
 
     for(var index = 0; index < numberOfAnswers; index++){
-        if (guessLength != this.board.answers[i]['cooordinates'].length) continue;
-
-        var answer = this.board.answers[i]['cooordinates'];
+        if (guessLength != this.board.answers[index]['coordinates'].length || this.board.answers[index]['found']) continue;
+        var answer = this.board.answers[index]['coordinates'];
         for(var j = 0; j < guessLength; j++){
-            if (!(~answer.indexOf(guess['cooordinates'][i]))) break;
-
+            if (!(~answer.indexOf(guess['coordinates'][j]))) break;
             if (j + 1 == guessLength){
-                this.foundWords.push(this.board.answers[i]);
+                this.board.answers[index]['found'] = true;
+                this.foundWords.push(this.board.answers[index]);
                 player.score += guessLength;
+                for (var i = 0; i < guessLength; i++){
+                    var set = guess['coordinates'][i].split(",");
+                    this.board.letters[Number(set[0])][Number(set[1])]['color'] = 'btn-danger';
+                }
                 // if (this.foundWords.length == this.board.answers.length) this.gameOver();
                 return true;
             }
@@ -148,7 +149,6 @@ function Board(){
 }
 Board.prototype.setup = function(characterSet){
     characterSet = characterSet || ["A","A","A","B","B","C","C","D","D","E","E","E","E","F","F","G","G","H","H","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","P","P","Q","R","R","S","S","T","T","U","U","V","W","X","Y","Y","Z"];
-
     this.letters = [];
     this.letterIndex = {};
     for (var i = 0; i < 15; i++){
@@ -156,11 +156,12 @@ Board.prototype.setup = function(characterSet){
         for(var j = 0; j < 15; j++){
             var newLetter = characterSet[Math.floor(Math.random()*characterSet.length)];
             if (!this.letterIndex.hasOwnProperty(newLetter)){
-                this.letterIndex[newLetter] = [];
+                this.letterIndex[newLetter] = [[i,j]];
+            }else{
+                this.letterIndex[newLetter].push([i,j]);
             }
-            this.letterIndex[newLetter].push([i,j]);
             // add text color as property
-            this.letters[i].push({'letter': newLetter,'index': [i,j]});
+            this.letters[i].push({'letter': newLetter,'index': [i,j],'color': 'btn-success'});
         }
     }
 }
@@ -180,9 +181,11 @@ Search.prototype.locate = function(wordObj){
     // if(word.length > this.board.letters.length || word.length > this.board.letters[0].length){
     //     return false;
     // }
-    var numberOfOccurrences = this.board.letterIndex[word[0]].length;
+    var indexArray = this.board.letterIndex[word[0]];
+    var numberOfOccurrences = indexArray.length;
+
     for (var i = 0; i < numberOfOccurrences; i++){
-        var currentLetter = this.board.letterIndex[word[0]][i];
+        var currentLetter = indexArray[i];
         this.checkSurround(currentLetter, word);
     }
 }
@@ -210,7 +213,7 @@ Search.prototype.checkSurround = function(cooordinate, word){
             for (var idx = 0;idx < answerLength; idx++){
                 answerCoordinates[idx]=answerCoordinates[idx].join(",");
             }
-            this.board.answers.push({'word':word, 'coordinates':answerCoordinates});
+            this.board.answers.push({'word':word, 'coordinates':answerCoordinates, 'found': false});
             return true;
         }
     }
@@ -241,31 +244,6 @@ Search.prototype.checkSurround = function(cooordinate, word){
 }
 
 module.exports = {'Player': Player,'game': WordSearch, 'board': Board, 'search': Search};
-    // if (startObj['index'][1]-restOfWord >= 0){
-    //     // Row Column
-    //     findWord.call(this,0,-1)
-    // }
-    // if (startObj['index'][0]-restOfWord >= 0 && startObj['index'][1]-restOfWord >= 0){
-    //     findWord.call(this,-1,-1)
-    // }
-    // if (startObj['index'][0]-restOfWord >= 0){
-    //     findWord.call(this,-1,0);
-    // }
-    // if (startObj['index'][0]-restOfWord >= 0 && startObj['index'][1]+restOfWord < numberOfColumns){
-    //     findWord.call(this,-1,1);
-    // }
-    // if (startObj['index'][1]+restOfWord < numberOfColumns){
-    //     findWord.call(this,0,1);
-    // }
-    // if (startObj['index'][0]+restOfWord < numberOfRows && startObj['index'][1]+restOfWord < numberOfColumns){
-    //     findWord.call(this,1,1);
-    // }
-    // if (startObj['index'][0]+restOfWord < numberOfRows){
-    //     findWord.call(this,1,0);
-    // }
-    // if (startObj['index'][0]+restOfWord < numberOfRows && startObj['index'][1]-restOfWord >= 0){
-    //     findWord.call(this,1,-1);
-    // }
 
 if(!module.parent){
     // TESTS Should Replace This
