@@ -61,7 +61,8 @@ WordSearch.prototype.checkGuess = function(playerKey, guess){
                     var set = guess['coordinates'][i].split(",");
                     this.board.letters[Number(set[0])][Number(set[1])]['color'] = 'btn-danger';
                 }
-                // if (this.foundWords.length == this.board.answers.length) this.gameOver();
+                // There has to Be A Better Way To End The Game
+                this.endGame();
                 return true;
             }
         } 
@@ -69,9 +70,10 @@ WordSearch.prototype.checkGuess = function(playerKey, guess){
     return false;
 }
 WordSearch.prototype.endTurn = function(){
-    // if(!this.endGame())
-    this.currentTurn += 1;
-    this.currentTurn %= this.players.length;
+    if (!this.endGame()){
+        this.currentTurn += 1;
+        this.currentTurn %= this.players.length;
+    }
 }
 WordSearch.prototype.pass = function(){
     this.consecutivePasses += 1;
@@ -116,6 +118,7 @@ WordSearch.prototype.scores = function(){
 }
 WordSearch.prototype.endGame = function(){
     if ((this.players.length == this.consecutivePasses) || (this.foundWords.length == this.board.answers.length)){
+        this.gameStatus = "Complete";
         return true;
     }else{
         return false;
@@ -148,7 +151,7 @@ function Board(){
     this.letterIndex;
 }
 Board.prototype.setup = function(characterSet){
-    characterSet = characterSet || ["A","A","A","B","B","C","C","D","D","E","E","E","E","F","F","G","G","H","H","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","P","P","Q","R","R","S","S","T","T","U","U","V","W","X","Y","Y","Z"];
+    characterSet = characterSet || ["A","A","A","A","B","B","C","C","D","D","E","E","E","E","E","F","F","G","G","H","H","I","I","I","I","I","J","J","K","K","L","L","M","M","N","N","O","O","O","O","O","P","P","Q","R","R","S","S","T","T","U","U","U","V","W","X","Y","Y","Y","Y","Z"];
     this.letters = [];
     this.letterIndex = {};
     for (var i = 0; i < 15; i++){
@@ -173,6 +176,7 @@ function Search(board){
 }
 Search.prototype.locate = function(wordObj){
     // Temporary Fix Words will Be entered in db in UpperCase
+    // Need To Clear Duplicates From DB
     var word = wordObj['word'].toUpperCase();
     // Words Will Already Be First Letter Verified
     // if (!this.board.letterIndex.hasOwnProperty(word[0])){

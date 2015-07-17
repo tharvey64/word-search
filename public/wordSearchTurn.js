@@ -22,23 +22,16 @@ $(document).ready(function(){
         validGuess = true,
         currentGuess = [],
         guessString = "",
-        validColor = false,
         letters = $('.guessSelection');
         var lettersLength = letters.length;
         form.elements.guess.value = guessString;
-        if (lettersLength == 0){
-            validColor = true;
-        }
-        else if (lettersLength < 4){
+        if (lettersLength < 4){
             validGuess = false;
         }
         else if (lettersLength != 0){
             // Probably faster to convert to integers first and then check
             var yDiff,xDiff;
             letters.each(function(index,element){
-                if (!validColor && element.dataset.color != "btn-danger"){
-                    validColor = true;
-                }
                 guessString += $(element).html();
                 if (index != 0){
                     previous = letters[index-1].name.split(",");
@@ -69,7 +62,7 @@ $(document).ready(function(){
                 currentGuess.push(element.name);
             });
         }
-        if (!validGuess || !validColor){
+        if (!validGuess){
             // Create An Alert Box or Message Box For Invalid Guesses
             console.log("Invalid Guess.");
             $('.guessSelection').each(function(index,element){
@@ -89,12 +82,15 @@ $(document).ready(function(){
             $.post('/games/play',$(form).serialize(),function(data){
                 // create event to be triggered
                 if(!data.success){
-                    alert("It Wasnt Your Damn Turn.");
-                    return false;
+                    var message = $('<p>').text(data.message);
+                    $('#gameAlerts').html(message);
                 }
                 else{
                     $('#createGame').trigger('endOfTurn',[gameID]);
                 }
+                $('.guessSelection').each(function(index,element){
+                    $(element).toggleClass(element.dataset.color + ' btn-primary guessSelection');
+                });
             });
         }
     });

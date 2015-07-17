@@ -7,6 +7,19 @@ body {
 #grid,#gameData{
     display: inline-block;
 }
+#gameData{
+    float: right;
+}
+#gameAlertsBox,#scoresBox {
+    min-height: 5em;
+    max-height: 5em;
+    overflow: scroll;
+}
+#foundWordsBox{
+    overflow: scroll;
+    min-height: 5em;
+    max-height: 15em;
+}
 #chat{
     margin-bottom: 8em;
     min-height: 5em;
@@ -21,23 +34,10 @@ body {
 }
 #messageForm { 
     /*Find Another Way To Do This*/
-    background: #000; 
     position: fixed;
     bottom: 0;
-    padding: .2em;
+    /*padding: .2em;*/
     width: 100%;
-}
-#messageForm input { 
-    border: 0; 
-    padding: 10px; 
-    width: 90%; 
-    margin-right: .5em; 
-}
-#messageForm button { 
-    width: 9%; 
-    background: rgb(130, 224, 255); 
-    border: none; 
-    padding: 10px;
 }
 #messages { 
     list-style-type: none; 

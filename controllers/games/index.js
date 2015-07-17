@@ -81,8 +81,9 @@ router.post('/join', function(req, res){
         res.status(404).send({'error':"Game Not Found."});
         return false;
     }
-
-    games[gameID].joinGame(newPlayer);
+    else if(games[gameID].gameStatus == "Building" || games[gameID].gameStatus == "Waiting"){
+        games[gameID].joinGame(newPlayer);
+    }
     res.redirect('/games/join/' + gameID + '/' + newPlayer.key + '/' + nickname);
 });
 
@@ -154,12 +155,15 @@ router.post('/play', function(req, res){
     gameID = req.body.gameID,
     coordinates = req.body.word,
     letters = req.body.guess;
+    var turn = games[gameID].currentTurn;
     if (!games[gameID]){
         res.status(404).send({'error':"Game Not Found."});
         return false;
     }
-    var turn = games[gameID].currentTurn;
-    if (games[gameID].players[turn].key != playerID){
+    else if (games[gameID].gameStatus == "Complete"){
+        res.json({'success': false,'score': 0, 'message': 'The Game Is Over.'});
+    }
+    else if (games[gameID].players[turn].key != playerID){
         res.redirect('/games/play/-1');
     }
     else if (letters.length == 0){
@@ -183,7 +187,7 @@ router.get('/play/:score', function(req, res){
         res.json({'success': true,'score': Number(score)});
     }
     else{
-        res.json({'success': false,'score': 0});
+        res.json({'success': false,'score': 0, 'message': 'It is not your turn'});
     }
     // this needs success and score
 });
