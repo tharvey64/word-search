@@ -89,7 +89,8 @@ $(document).ready(function(){
             $.post('/games/play',$(form).serialize(),function(data){
                 // create event to be triggered
                 if(!data.success){
-                    alert("It Wasnt Your Damn Turn.");
+                    var message = $('<p>').text(data.message);
+                    $('#gameAlerts').html(message);
                     return false;
                 }
                 else{

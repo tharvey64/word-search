@@ -69,7 +69,6 @@ WordSearch.prototype.checkGuess = function(playerKey, guess){
     return false;
 }
 WordSearch.prototype.endTurn = function(){
-    // if(!this.endGame())
     this.currentTurn += 1;
     this.currentTurn %= this.players.length;
 }
@@ -116,6 +115,7 @@ WordSearch.prototype.scores = function(){
 }
 WordSearch.prototype.endGame = function(){
     if ((this.players.length == this.consecutivePasses) || (this.foundWords.length == this.board.answers.length)){
+        this.gameStatus = "Complete";
         return true;
     }else{
         return false;
