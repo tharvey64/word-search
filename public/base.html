@@ -20,27 +20,38 @@
     <div class="container-fluid">
       
       <div class="container-fluid" id="createGame">
-        <!-- Bootstrap the form -->
         <form id="createGameForm" action="/games/create">
-          <h3>Create Game</h3>
-          <p>Select your opponents.</p>
-          <select id="userList" multiple></select>
-          <input type="hidden" name="nickname">
-          <input type="submit" value="Submit">
+          <fieldset>
+            <legend>Create Game</legend>
+            <div class="form-group">
+              <label for="userList">Select your opponents.</p>
+              <select class="form-control" id="userList" multiple></select>
+              <input type="hidden" name="nickname">
+              <button type="submit" class="btn btn-default btn-block">Submit</button>
+            </div>
+
+          </fieldset>
         </form>
       </div>
       <!-- Try Using A Casrousel To Switch Between Game Chat and Main chat -->
       <!-- On top of this i can make the chat a drop down or collapsing -->
       <div class="container-fluid well" id="chat">
+        <h4>Message Board</h4>
         <ul id="messages"></ul>
       </div>
     </div>
   </body>
   <footer class="footer">
-    <!-- Bootstrap the form -->
     <div class="container-fluid">
         <form id="messageForm" action="">
-            <input id="m" autocomplete="off"><button>Send</button>
+          <div class="panel-body col-sm-12">
+            <div class="input-group">
+              <input type="text" class="form-control" id="m" autocomplete="off">
+              <span class="input-group-btn">
+                <button type="submit" class="btn btn-info">Send</button>
+              </span>
+            </div>
+          </div>
         </form>
     </div>
   </footer>

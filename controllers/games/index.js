@@ -81,8 +81,9 @@ router.post('/join', function(req, res){
         res.status(404).send({'error':"Game Not Found."});
         return false;
     }
-
-    games[gameID].joinGame(newPlayer);
+    else if(games[gameID].gameStatus == "Building" || games[gameID].gameStatus == "Waiting"){
+        games[gameID].joinGame(newPlayer);
+    }
     res.redirect('/games/join/' + gameID + '/' + newPlayer.key + '/' + nickname);
 });
 

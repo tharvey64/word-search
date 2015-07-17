@@ -105,6 +105,9 @@ $(document).ready(function(){
 				$('#createGame').html("Waiting For Game To Start....");
 				$('#messages').html("");
 			}
+			else{
+				console.log("Unable to join.");
+			}
 		});
 		// Join The Game And Redirect To Waiting Room
 	});
