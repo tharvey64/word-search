@@ -61,7 +61,7 @@ WordSearch.prototype.checkGuess = function(playerKey, guess){
                     var set = guess['coordinates'][i].split(",");
                     this.board.letters[Number(set[0])][Number(set[1])]['color'] = 'btn-danger';
                 }
-                // if (this.foundWords.length == this.board.answers.length) this.gameOver();
+                this.endGame();
                 return true;
             }
         } 
@@ -69,8 +69,10 @@ WordSearch.prototype.checkGuess = function(playerKey, guess){
     return false;
 }
 WordSearch.prototype.endTurn = function(){
-    this.currentTurn += 1;
-    this.currentTurn %= this.players.length;
+    if (!this.endGame()){
+        this.currentTurn += 1;
+        this.currentTurn %= this.players.length;
+    }
 }
 WordSearch.prototype.pass = function(){
     this.consecutivePasses += 1;

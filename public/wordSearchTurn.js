@@ -36,6 +36,8 @@ $(document).ready(function(){
             // Probably faster to convert to integers first and then check
             var yDiff,xDiff;
             letters.each(function(index,element){
+                // This validColor Variable Does Not Work On
+                // Compound Words If the Larger Word is Found First
                 if (!validColor && element.dataset.color != "btn-danger"){
                     validColor = true;
                 }
@@ -91,11 +93,13 @@ $(document).ready(function(){
                 if(!data.success){
                     var message = $('<p>').text(data.message);
                     $('#gameAlerts').html(message);
-                    return false;
                 }
                 else{
                     $('#createGame').trigger('endOfTurn',[gameID]);
                 }
+                $('.guessSelection').each(function(index,element){
+                    $(element).toggleClass(element.dataset.color + ' btn-primary guessSelection');
+                });
             });
         }
     });
