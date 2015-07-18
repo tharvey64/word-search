@@ -18,7 +18,6 @@
 
   <body>
     <div class="container-fluid">
-      
       <div class="container-fluid" id="createGame">
         <form id="createGameForm" action="/games/create">
           <fieldset>
@@ -29,32 +28,64 @@
               <input type="hidden" name="nickname">
               <button type="submit" class="btn btn-default btn-block">Submit</button>
             </div>
-
           </fieldset>
         </form>
       </div>
-      <!-- Try Using A Casrousel To Switch Between Game Chat and Main chat -->
-      <!-- On top of this i can make the chat a drop down or collapsing -->
-      <div class="container-fluid well" id="chat">
-        <h4>Message Board</h4>
-        <ul id="messages"></ul>
+
+
+      <div id="chat">
+        <!-- Indicators -->
+        <ul class="nav nav-tabs">
+          <li role="presentation" class="active"><a href="#">Main</a></li>
+          <!-- <li role="presentation"><a href="#">Game</a></li> -->
+        </ul>
+        <!-- Content -->
+        <div id="mainChat" class="panel panel-default container-fluid well active">
+          <h4 class="panel-header">Message Board</h4>
+          <div class="messages panel-body">
+            <ul id="mainMessages" class="list-group list-unstyled"></ul>
+          </div>
+
+          <div class="panel-footer container-fluid formBox">
+            <form id="messageForm" action="">
+              <div class="col-sm-12">
+                <div class="input-group">
+                  <span class="input-group-btn">
+                    <button type="submit" class="btn btn-info">Send</button>
+                  </span>
+                  <input type="text" class="form-control" id="mainM" autocomplete="off">
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
+
     </div>
   </body>
-  <footer class="footer">
-    <div class="container-fluid">
-        <form id="messageForm" action="">
-          <div class="panel-body col-sm-12">
+  <!-- Maybe name this Chat Template -->
+  <script id="gameChatTabTemplate" type="x-tmpl-mustache">
+    <div id="gameChat" class="container-fluid panel panel-default">
+      <h4 class="panel-header">Game Message Board</h4>
+      <div class="messages panel-body">
+        <ul id="gameMessages"></ul>
+        <!-- This Form Should submit to gameMessages -->
+      </div>
+      
+      <div class="container-fluid formBox panel-footer">
+        <form id="gameMessageForm" action="">
+          <div class="col-sm-12">
             <div class="input-group">
-              <input type="text" class="form-control" id="m" autocomplete="off">
               <span class="input-group-btn">
                 <button type="submit" class="btn btn-info">Send</button>
               </span>
+              <input type="text" class="form-control" id="gameM" autocomplete="off">
             </div>
           </div>
         </form>
+      </div>
     </div>
-  </footer>
+  </script>
   <script id="createGameFormTemplate" type="x-tmpl-mustache">
     <form id="createGameForm" action="/games/create">
       <h3>Create Game</h3>

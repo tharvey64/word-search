@@ -1,52 +1,77 @@
 body { 
-    font: 13px Helvetica, Arial; 
+    font: 13px Helvetica, Arial;
+    background-color: #C63D0F; 
 }
 #createGameForm select {
     min-width: 10em;
+    background-color: #FDF3E7;
 }
+/*Game Interface*/
 #grid,#gameData{
     display: inline-block;
+}
+td.letterCell {
+    padding: 0;
 }
 #gameData{
     float: right;
 }
-#gameAlertsBox,#scoresBox {
+#gameAlertsBox {
     min-height: 5em;
     max-height: 5em;
     overflow: scroll;
 }
+#playerListBox{
+    overflow: scroll;
+    min-height: 10em;
+    max-height: 15em;
+}
+#scoresBox{
+    overflow: scroll;
+    min-height: 15em;
+    max-height: 20em;
+}
 #foundWordsBox{
     overflow: scroll;
     min-height: 5em;
-    max-height: 15em;
+    max-height: 10em;
 }
+/*End Game Interface*/
+/*Chat */
 #chat{
-    margin-bottom: 8em;
-    min-height: 5em;
-    max-height: 8em;
-    overflow: scroll;
+    background-color: #7E8F7C;
+    height: 20em;
 }
-/*#playerList, #foundWords, #scores{
-    border-style: solid;
-}*/
+.messages{
+    background-color: #7E8F7C;
+    min-height: 15em;
+    max-height:15em;
+}
+.formBox{
+    padding: 0;
+    background-color: #7E8F7C;
+    height: 4em;
+    max-height: 4em;
+}
 .sentMessage{
     color: green;
 }
-#messageForm { 
-    /*Find Another Way To Do This*/
-    position: fixed;
+#gameMessageForm,#messageForm { 
+    /*Find Another Way To Do This
+    /*position: fixed;*/
     bottom: 0;
     /*padding: .2em;*/
-    width: 100%;
+    width: 90%;
 }
-#messages { 
+.messages { 
     list-style-type: none; 
     margin: 0; 
     padding: 0; 
 }
-#messages li { 
+.messages li { 
     padding: 5px 10px; 
 }
-#messages li: nth-child(odd) { 
+.messages li: nth-child(odd) { 
     background: #eee; 
 }
+/*End Tabs*/

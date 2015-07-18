@@ -41,18 +41,18 @@ $(document).ready(function(){
 
 	// Recieving Chat Message
 	socket.on('chat message', function(msg){
-		$('#messages').append($('<li>').text(msg));
+		$('#mainMessages').append($('<li>').text(msg));
 	});
 	// Message Sending
 	$('#messageForm').on('submit', function(event){
 		event.preventDefault();
-		var message = this.elements.m.value;
+		var message = this.elements.mainM.value;
 		// Message Appended To Submiters Screen
 		var item = $('<li>')
 		item.attr("class","sentMessage");
-		$('#messages').append(item.text("Me: " + message));
+		$('#mainMessages').append(item.text("Me: " + message));
 		socket.emit('chat message', nickname + ": " + message);
-		this.elements.m.value = "";
+		this.elements.mainM.value = "";
 	});
 	// Socket Game 
 	// socket.on('start game', function(gameID){

@@ -1,10 +1,10 @@
 <div id="gameInterface">
   <div class="col-lg-8 pull-left jumbotron" id="grid">
     <h2>{{nickname}}</h2>
-    <table class="table table-condensed">
+    <table>
         <tbody>
             {{#grid}}
-            <tr>{{#.}}<td><button class="letter btn {{color}} btn-block" name="{{index}}" data-color="{{color}}">{{letter}}</button></td>{{/.}}</tr>
+            <tr>{{#.}}<td class="letterCell"><button class="letter btn {{color}} btn-block" name="{{index}}" data-color="{{color}}">{{letter}}</button></td>{{/.}}</tr>
             {{/grid}}
         </tbody>
     </table>
