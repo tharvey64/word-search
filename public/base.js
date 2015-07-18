@@ -66,7 +66,7 @@ $(document).ready(function(){
 		var template = $('#gameInviteTemplate').html();
 		Mustache.parse(template);
 		var rendered = Mustache.render(template, {'gameID':gameID,'nickname':nickname});
-		$('#messages').append(rendered);
+		$('#mainMessages').append(rendered);
 	});
 
 	socket.on('sendUsers', function(connected){
@@ -103,6 +103,7 @@ $(document).ready(function(){
 				playerID = data.playerID
 				socket.emit('join game', room);
 				$('#createGame').html("Waiting For Game To Start....");
+				// This Will Switch to The Game Chat and Deactivate the join button
 				$('#messages').html("");
 			}
 			else{
