@@ -19,6 +19,14 @@ function buildBoard(game, player, nickname){
 			data['nickname'] = nickname;
 			var board = Mustache.render(template, data);
 			$('#createGame').html(board);
+			// Add Game Chat
+			var chatTemplate = $('#gameChatTabTemplate').html();
+			Mustache.parse(chatTemplate);
+			var chatRendered = Mustache.render(chatTemplate, {'gameID': game});
+			$('#chat').append(chatRendered);
+			$('#chatTabs').append($('<li role="presentation" class="gameChat" data-target=".gameChat"><a href="#">Game</a></li>'));
+			$('div.gameChat').hide();
+
 		});
 	});
 }
@@ -43,7 +51,22 @@ $(document).ready(function(){
 	socket.on('chat message', function(msg){
 		$('#mainMessages').append($('<li>').text(msg));
 	});
+
+	socket.on('game message', function(msg){
+		$('#gameMessages').append($('<li>').text(msg));
+	});
 	// Message Sending
+	$('#chat').on('submit', '#gameMessageForm',function(event){
+		event.preventDefault();
+		var message = this.elements.gameM.value;
+		var gameID = this.elements.gameID.value;
+		// Message Appended To Submiters Screen
+		var item = $('<li>')
+		item.attr("class","sentMessage");
+		$('#gameMessages').append(item.text("Me: " + message));
+		socket.emit('game message', nickname + ": " + message, gameID);
+		this.elements.gameM.value = "";
+	});
 	$('#messageForm').on('submit', function(event){
 		event.preventDefault();
 		var message = this.elements.mainM.value;
@@ -53,6 +76,13 @@ $(document).ready(function(){
 		$('#mainMessages').append(item.text("Me: " + message));
 		socket.emit('chat message', nickname + ": " + message);
 		this.elements.mainM.value = "";
+	});
+	// Chat Toggle
+	$('#chatTabs').on('click', 'li',function(event){
+		event.preventDefault();
+		$('div.active').hide();
+		$(this.dataset.target + ', .active').toggleClass('active');
+		$('div.active').show();
 	});
 	// Socket Game 
 	// socket.on('start game', function(gameID){
@@ -95,6 +125,7 @@ $(document).ready(function(){
 	});
 	// Player Joins A Game
 	// Should Redirect Player To Game Lobby
+	// Deactivate The Join Buttons After The Game Starts
 	$('#chat').on('submit', '#gameInvitationForm', function(event){
 		event.preventDefault();
 		var room = this.elements.gameID.value

@@ -35,18 +35,18 @@
 
       <div id="chat">
         <!-- Indicators -->
-        <ul class="nav nav-tabs">
-          <li role="presentation" class="active"><a href="#">Main</a></li>
+        <ul id="chatTabs" class="nav nav-tabs">
+          <li role="presentation" class="mainChat active" data-target=".mainChat"><a href="#">Main</a></li>
           <!-- <li role="presentation"><a href="#">Game</a></li> -->
         </ul>
         <!-- Content -->
-        <div id="mainChat" class="panel panel-default container-fluid well active">
+        <div class="mainChat panel panel-default container-fluid active">
           <h4 class="panel-header">Message Board</h4>
           <div class="messages panel-body">
             <ul id="mainMessages" class="list-group list-unstyled messages"></ul>
           </div>
 
-          <div class="panel-footer container-fluid formBox">
+          <div class="mainChat panel-footer container-fluid formBox">
             <form id="messageForm" action="">
               <div class="col-sm-12">
                 <div class="input-group">
@@ -65,7 +65,7 @@
   </body>
   <!-- Maybe name this Chat Template -->
   <script id="gameChatTabTemplate" type="x-tmpl-mustache">
-    <div id="gameChat" class="container-fluid panel panel-default">
+    <div class="gameChat container-fluid panel panel-default">
       <h4 class="panel-header">Game Message Board</h4>
       <div class="messages panel-body">
         <ul id="gameMessages"></ul>
@@ -80,6 +80,7 @@
                 <button type="submit" class="btn btn-info">Send</button>
               </span>
               <input type="text" class="form-control" id="gameM" autocomplete="off">
+              <input type="hidden" name="gameID" value="{{ gameID }}">
             </div>
           </div>
         </form>

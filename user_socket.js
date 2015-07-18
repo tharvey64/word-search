@@ -17,29 +17,33 @@ exports.live = function(tempIO){
         });
 
         socket.on('newGame',function(users, gameId){
-            // Create Game Route
-            // This game desperatly needs a db
             for(i=0; i < users.length; i++){
                 socket.broadcast.to(connected[users[i]]).emit('gameInvitation', gameId);
             }
         });
-
+        // Use leave in the same fashion as join
         socket.on('join game', function(gameID){
             // Join Game Route
             socket.join(gameID);
             // maybe this should be an html string
-            socket.to(gameID).emit('chat message', name + " Joined Game");
+            socket.to(gameID).emit('game message', name + " Joined Game");
         });
 
         socket.on('get game state', function(gameID){
             tempIO.to(gameID).emit('get game state', gameID);
-            tempIO.to(gameID).emit('chat message', "Game Starting");
+            // tempIO.to(gameID).emit('game message', "Game Starting");
         });
 
         socket.on('chat message', function(msg){
             socket.broadcast.emit('chat message', msg);
         });
         
+        socket.on('game message', function(msg, gameID){
+            socket.to(gameID).emit('game message', msg);
+        });
+
+        // socket.on('private message', function(msg, somePlayerMarker){});
+
         socket.on('disconnect', function(){
             tempIO.emit('chat message', name + " logged out.");
             delete connected[name];

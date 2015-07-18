@@ -56,7 +56,7 @@ td.letterCell {
 .sentMessage{
     color: green;
 }
-#gameMessageForm,#messageForm { 
+#gameMessageForm,#messageForm{ 
     /*Find Another Way To Do This
     /*position: fixed;*/
     bottom: 0;
