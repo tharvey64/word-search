@@ -81,17 +81,11 @@ $(document).ready(function(){
 	$('#chatTabs').on('click', 'li',function(event){
 		event.preventDefault();
 		$('div.active').hide();
-		$(this.dataset.target + ', .active').toggleClass('active');
+		$('.active').toggleClass('active');
+		$(this.dataset.target).toggleClass('active');
 		$('div.active').show();
 	});
 	// Socket Game 
-	// socket.on('start game', function(gameID){
-	// 	$('#createGame').html(gameBoard);
-	// });
-	socket.on('start game', function(gameBoard){
-		$('#createGame').html(gameBoard);
-	});
-
 	socket.on('gameInvitation', function(gameID){
 		var template = $('#gameInviteTemplate').html();
 		Mustache.parse(template);
@@ -106,6 +100,10 @@ $(document).ready(function(){
 				$('#userList').append($('<option>').text(connected[i]));
 			}
 		}
+	});
+
+	socket.on('get game state', function(gameID){
+		buildBoard(gameID, playerID, nickname);
 	});
 
 	$('#createGameForm').on('submit', function(event){
@@ -159,9 +157,5 @@ $(document).ready(function(){
 	// Triggered in wordSearchTurn.js
 	$('#createGame').on('endOfTurn', function(event, gameID){
 		socket.emit('get game state', gameID);
-	});
-
-	socket.on('get game state', function(gameID){
-		buildBoard(gameID, playerID, nickname);
 	});
 });
