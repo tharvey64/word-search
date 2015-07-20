@@ -1,36 +1,55 @@
-function buildBoard(game, player, nickname){
+function mainLobby(nickname){
+	var gameCreationTemplate = $('#createGameFormTemplate').html();
+	$('#createGame').empty()
+	Mustache.parse(gameCreationTemplate);
+	var rendered = Mustache.render(gameCreationTemplate);
+	$('#createGame').append(rendered);
+	$("#createGameForm input[name='nickname']").val(nickname);
+}
+function buildBoard(gameID, playerID, nickname, socket){
+	var gameOver = false;
 	$.get('/games/board', function(data){
-		var template = data;
-		Mustache.parse(template);
-		$.get('/games/info/' + game, {'player': player, 'nickname': nickname}, function(data){
-			var players = [],
-			numberOfPlayers = data.turnSeq.length; 
-			for (i=0;i<numberOfPlayers;i++){
-				var p = {'name': data.turnSeq[i], 'score': data.scores[data.turnSeq[i]]}
-				players.push(p);
+		var boardTemplate = data;
+		Mustache.parse(boardTemplate);
+		$.get('/games/info/' + gameID, {'player': playerID, 'nickname': nickname}, function(data){
+			if (data['gameStatus'] == "Complete"){
+				mainLobby(nickname);
+				$('.gameChat').remove();
+				socket.emit('game over', gameID);
 			}
-			// cant really test this until play route works
-			players.sort(function(a,b){
-				return b.score - a.score
-			});
-			data['order'] = players;
-			data['gameID'] = game;
-			data['playerID'] = player;
-			data['nickname'] = nickname;
-			var board = Mustache.render(template, data);
-			$('#createGame').html(board);
-			// Add Game Chat
-			var chatTemplate = $('#gameChatTabTemplate').html();
-			Mustache.parse(chatTemplate);
-			var chatRendered = Mustache.render(chatTemplate, {'gameID': game});
-			$('#chat').append(chatRendered);
-			$('#chatTabs').append($('<li role="presentation" class="gameChat" data-target=".gameChat"><a href="#">Game</a></li>'));
-			$('div.gameChat').hide();
-
+			else{
+				var players = [],
+				numberOfPlayers = data.turnSeq.length; 
+				for (var i=0;i<numberOfPlayers;i++){
+					var p = {'name': data.turnSeq[i], 'score': data.scores[data.turnSeq[i]]}
+					players.push(p);
+				}
+				players.sort(function(a,b){
+					return b.score - a.score
+				});
+				data['order'] = players;
+				data['gameID'] = gameID;
+				data['playerID'] = playerID;
+				data['nickname'] = nickname;
+				var board = Mustache.render(boardTemplate, data);
+				$('#createGame').html(board);
+			}
+			console.log('Callback');
 		});
 	});
+	console.log(gameOver);
+	return gameOver;
+}
+function gameChat(gameID){
+	var chatTemplate = $('#gameChatTabTemplate').html();
+	Mustache.parse(chatTemplate);
+	var chatRendered = Mustache.render(chatTemplate, {'gameID': gameID});
+	$('#chat').append(chatRendered);
+	$('#chatTabs').append($('<li role="presentation" class="gameChat" data-target=".gameChat"><a href="#">Game</a></li>'));
+	$('div.gameChat').hide();
 }
 $(document).ready(function(){
+	// User Model
 	var nickname = prompt("Please enter a username:");
 	var socket = io();
 	var playerID;
@@ -86,16 +105,16 @@ $(document).ready(function(){
 		$('div.active').show();
 	});
 	// Socket Game 
-	socket.on('gameInvitation', function(gameID){
+	socket.on('gameInvitation', function(gameID, admin){
 		var template = $('#gameInviteTemplate').html();
 		Mustache.parse(template);
-		var rendered = Mustache.render(template, {'gameID':gameID,'nickname':nickname});
+		var rendered = Mustache.render(template, {'gameID':gameID,'nickname':nickname, 'admin': admin});
 		$('#mainMessages').append(rendered);
 	});
 
 	socket.on('sendUsers', function(connected){
 		$('#userList').empty()
-		for (i=0; i < connected.length; i++){
+		for (var i=0; i < connected.length; i++){
 			if(connected[i] != nickname){
 				$('#userList').append($('<option>').text(connected[i]));
 			}
@@ -103,13 +122,13 @@ $(document).ready(function(){
 	});
 
 	socket.on('get game state', function(gameID){
-		buildBoard(gameID, playerID, nickname);
+		buildBoard(gameID, playerID, nickname, socket);
 	});
 
-	$('#createGameForm').on('submit', function(event){
+	$('#createGame').on('submit', '#createGameForm',function(event){
 		event.preventDefault();
 		var notifyUsers = $('#userList').val() || [];
-		
+
 		$.post("games/create/",$(this).serialize(), function(data){
 			// This Should Be a Redirect
 			var template = $('#startGameTemplate').html();
@@ -117,8 +136,10 @@ $(document).ready(function(){
 			var rendered = Mustache.render(template, data);
 			$('#createGame').html(rendered);
 			playerID = data.playerID
-			socket.emit('newGame', notifyUsers, data.gameID);
+			socket.emit('newGame', notifyUsers, data.gameID, nickname);
 			socket.emit('join game', data.gameID);
+			// Add Chat Tab
+			gameChat(data.gameID);
 		});
 	});
 	// Player Joins A Game
@@ -131,17 +152,21 @@ $(document).ready(function(){
 			if (data.registered){
 				playerID = data.playerID
 				socket.emit('join game', room);
+				// Add Chat Tab
+				gameChat(room);
 				$('#createGame').html("Waiting For Game To Start....");
 				// This Will Switch to The Game Chat and Deactivate the join button
 				$('#messages').html("");
 			}
 			else{
+				// Add this to the chat
+				// Try to make this informative
+				// ie Game Full, Already Joined, Not Invited
 				console.log("Unable to join.");
 			}
 		});
 		// Join The Game And Redirect To Waiting Room
 	});
-
 	// Move This To Game Lobby
 	$('#createGame').on('submit', '#startGameForm',function(event){
 		event.preventDefault();

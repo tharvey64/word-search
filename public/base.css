@@ -61,7 +61,7 @@ td.letterCell {
     /*position: fixed;*/
     bottom: 0;
     /*padding: .2em;*/
-    width: 90%;
+    width: 100%;
 }
 .messages { 
     list-style-type: none; 

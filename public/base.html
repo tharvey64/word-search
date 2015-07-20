@@ -18,8 +18,8 @@
 
   <body>
     <div class="container-fluid">
-      <div class="container-fluid" id="createGame">
-        <form id="createGameForm" action="/games/create">
+      <div id="createGame" class="container-fluid">
+        <form id="createGameForm" action="/games/create" method="POST">
           <fieldset>
             <legend>Create Game</legend>
             <div class="form-group">
@@ -37,7 +37,6 @@
         <!-- Indicators -->
         <ul id="chatTabs" class="nav nav-tabs">
           <li role="presentation" class="mainChat active" data-target=".mainChat"><a href="#">Main</a></li>
-          <!-- <li role="presentation"><a href="#">Game</a></li> -->
         </ul>
         <!-- Content -->
         <div class="mainChat panel panel-default container-fluid active">
@@ -88,20 +87,26 @@
     </div>
   </script>
   <script id="createGameFormTemplate" type="x-tmpl-mustache">
-    <form id="createGameForm" action="/games/create">
-      <h3>Create Game</h3>
-      <p>Select your opponents.</p>
-      <select id="userList" multiple></select>
-      <input type="hidden" name="nickname">
-      <input type="submit" value="Submit">
+    <form id="createGameForm" action="/games/create" method="POST">
+      <fieldset>
+        <legend>Create Game</legend>
+        <div class="form-group">
+          <label for="userList">Select your opponents.</p>
+          <select class="form-control" id="userList" multiple></select>
+          <input type="hidden" name="nickname">
+          <button type="submit" class="btn btn-default btn-block">Submit</button>
+        </div>
+      </fieldset>
     </form>
   </script>
   <script id="gameInviteTemplate" type="x-tmpl-mustache">
-    <form id="gameInvitationForm" action="/games/join" method="POST">
-      <input type="hidden" name="nickname" value={{ nickname }}>
-      <input type="hidden" name="gameID" value={{ gameID }}>
-      <input type="submit" value="Join">
-    </form>
+    <li>{{admin}} has invited you to a game: 
+      <form id="gameInvitationForm" action="/games/join" method="POST">
+        <input type="hidden" name="nickname" value={{ nickname }}>
+        <input type="hidden" name="gameID" value={{ gameID }}>
+        <input type="submit" value="Join">
+      </form>
+    </li>
   </script>
 <!-- Move This -->
   <script id="startGameTemplate" type="x-tmpl-mustache">
@@ -111,6 +116,7 @@
       <input type="submit" value="Start Game">
     </form>
   </script>
+  <!-- Remove This -->
   <script id="refreshGameTemplate" type="x-tmpl-mustache">
     <form id="refreshGameForm" action="/games/info" method="POST">
       <input type="hidden" name="playerID" value={{ playerID }}>

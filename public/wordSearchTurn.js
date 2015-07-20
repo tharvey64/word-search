@@ -25,10 +25,10 @@ $(document).ready(function(){
         letters = $('.guessSelection');
         var lettersLength = letters.length;
         form.elements.guess.value = guessString;
-        if (lettersLength < 4){
+        if (lettersLength < 4 && lettersLength > 0){
             validGuess = false;
         }
-        else if (lettersLength != 0){
+        else {
             // Probably faster to convert to integers first and then check
             var yDiff,xDiff;
             letters.each(function(index,element){
