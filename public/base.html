@@ -18,9 +18,8 @@
 
   <body>
     <div class="container-fluid">
-      
-      <div class="container-fluid" id="createGame">
-        <form id="createGameForm" action="/games/create">
+      <div id="createGame" class="container-fluid">
+        <form id="createGameForm" action="/games/create" method="POST">
           <fieldset>
             <legend>Create Game</legend>
             <div class="form-group">
@@ -29,47 +28,85 @@
               <input type="hidden" name="nickname">
               <button type="submit" class="btn btn-default btn-block">Submit</button>
             </div>
-
           </fieldset>
         </form>
       </div>
-      <!-- Try Using A Casrousel To Switch Between Game Chat and Main chat -->
-      <!-- On top of this i can make the chat a drop down or collapsing -->
-      <div class="container-fluid well" id="chat">
-        <h4>Message Board</h4>
-        <ul id="messages"></ul>
+
+
+      <div id="chat">
+        <!-- Indicators -->
+        <ul id="chatTabs" class="nav nav-tabs">
+          <li role="presentation" class="mainChat active" data-target=".mainChat"><a href="#">Main</a></li>
+        </ul>
+        <!-- Content -->
+        <div class="mainChat panel panel-default container-fluid active">
+          <h4 class="panel-header">Message Board</h4>
+          <div class="messages panel-body">
+            <ul id="mainMessages" class="list-group list-unstyled messages"></ul>
+          </div>
+
+          <div class="mainChat panel-footer container-fluid formBox">
+            <form id="messageForm" action="">
+              <div class="col-sm-12">
+                <div class="input-group">
+                  <span class="input-group-btn">
+                    <button type="submit" class="btn btn-info">Send</button>
+                  </span>
+                  <input type="text" class="form-control" id="mainM" autocomplete="off">
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
+
     </div>
   </body>
-  <footer class="footer">
-    <div class="container-fluid">
-        <form id="messageForm" action="">
-          <div class="panel-body col-sm-12">
+  <!-- Maybe name this Chat Template -->
+  <script id="gameChatTabTemplate" type="x-tmpl-mustache">
+    <div class="gameChat container-fluid panel panel-default">
+      <h4 class="panel-header">Game Message Board</h4>
+      <div class="messages panel-body">
+        <ul id="gameMessages" class="list-group list-unstyled messages"></ul>
+        <!-- This Form Should submit to gameMessages -->
+      </div>
+      
+      <div class="container-fluid formBox panel-footer">
+        <form id="gameMessageForm" action="">
+          <div class="col-sm-12">
             <div class="input-group">
-              <input type="text" class="form-control" id="m" autocomplete="off">
               <span class="input-group-btn">
                 <button type="submit" class="btn btn-info">Send</button>
               </span>
+              <input type="text" class="form-control" id="gameM" autocomplete="off">
+              <input type="hidden" name="gameID" value="{{ gameID }}">
             </div>
           </div>
         </form>
+      </div>
     </div>
-  </footer>
+  </script>
   <script id="createGameFormTemplate" type="x-tmpl-mustache">
-    <form id="createGameForm" action="/games/create">
-      <h3>Create Game</h3>
-      <p>Select your opponents.</p>
-      <select id="userList" multiple></select>
-      <input type="hidden" name="nickname">
-      <input type="submit" value="Submit">
+    <form id="createGameForm" action="/games/create" method="POST">
+      <fieldset>
+        <legend>Create Game</legend>
+        <div class="form-group">
+          <label for="userList">Select your opponents.</p>
+          <select class="form-control" id="userList" multiple></select>
+          <input type="hidden" name="nickname">
+          <button type="submit" class="btn btn-default btn-block">Submit</button>
+        </div>
+      </fieldset>
     </form>
   </script>
   <script id="gameInviteTemplate" type="x-tmpl-mustache">
-    <form id="gameInvitationForm" action="/games/join" method="POST">
-      <input type="hidden" name="nickname" value={{ nickname }}>
-      <input type="hidden" name="gameID" value={{ gameID }}>
-      <input type="submit" value="Join">
-    </form>
+    <li>{{admin}} has invited you to a game: 
+      <form id="gameInvitationForm" action="/games/join" method="POST">
+        <input type="hidden" name="nickname" value={{ nickname }}>
+        <input type="hidden" name="gameID" value={{ gameID }}>
+        <input type="submit" value="Join">
+      </form>
+    </li>
   </script>
 <!-- Move This -->
   <script id="startGameTemplate" type="x-tmpl-mustache">
@@ -79,6 +116,7 @@
       <input type="submit" value="Start Game">
     </form>
   </script>
+  <!-- Remove This -->
   <script id="refreshGameTemplate" type="x-tmpl-mustache">
     <form id="refreshGameForm" action="/games/info" method="POST">
       <input type="hidden" name="playerID" value={{ playerID }}>

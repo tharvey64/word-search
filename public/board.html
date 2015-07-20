@@ -1,15 +1,5 @@
 <div id="gameInterface">
-  <div class="col-lg-8 pull-left jumbotron" id="grid">
-    <h2>{{nickname}}</h2>
-    <table class="table table-condensed">
-        <tbody>
-            {{#grid}}
-            <tr>{{#.}}<td><button class="letter btn {{color}} btn-block" name="{{index}}" data-color="{{color}}">{{letter}}</button></td>{{/.}}</tr>
-            {{/grid}}
-        </tbody>
-    </table>
-  </div>
-  <div class="col-md-4 pull-right panel panel-default" id="gameData">
+  <div class="col-md-4 pull-left panel panel-default" id="gameData">
     <div class="panel-body">
       <div id="playerListBox">
         <p>{{gameStatus}}</p>
@@ -52,5 +42,15 @@
         </ol>
       </div>
     </div>
+  </div>
+  <div class="col-lg-8 pull-right jumbotron" id="grid">
+    <h2>{{nickname}}</h2>
+    <table>
+        <tbody>
+            {{#grid}}
+            <tr>{{#.}}<td class="letterCell"><button class="letter btn {{color}} btn-block" name="{{index}}" data-color="{{color}}">{{letter}}</button></td>{{/.}}</tr>
+            {{/grid}}
+        </tbody>
+    </table>
   </div>
 </div>
