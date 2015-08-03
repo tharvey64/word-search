@@ -81,7 +81,8 @@ $(document).ready(function(){
                 // console.log($.param({a:currentGuess},true));
                 form.elements.word.value = currentGuess.join(";");
             }
-            $.post('/games/play',$(form).serialize(),function(data){
+
+            $.post($(form).attr("action"),$(form).serialize(),function(data){
                 // create event to be triggered
                 if(!data.success){
                     var message = $('<p>').text(data.message);

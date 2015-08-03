@@ -17,13 +17,18 @@
   </head>
 
   <body>
+    <div id="header" class="page-header">
+      <h1>Wa-Wa-Wa-Word Search</h3>
+    </div>
+
     <div class="container-fluid">
+
       <div id="createGame" class="container-fluid">
         <form id="createGameForm" action="/games/create" method="POST">
           <fieldset>
             <legend>Create Game</legend>
             <div class="form-group">
-              <label for="userList">Select your opponents.</p>
+              <label for="userList">Select your opponents.</label>
               <select class="form-control" id="userList" multiple></select>
               <input type="hidden" name="nickname">
               <button type="submit" class="btn btn-default btn-block">Submit</button>
@@ -101,7 +106,7 @@
   </script>
   <script id="gameInviteTemplate" type="x-tmpl-mustache">
     <li>{{admin}} has invited you to a game: 
-      <form id="gameInvitationForm" action="/games/join" method="POST">
+      <form id="gameInvitationForm" action="/games/join/{{ gameID }}" method="POST">
         <input type="hidden" name="nickname" value={{ nickname }}>
         <input type="hidden" name="gameID" value={{ gameID }}>
         <input type="submit" value="Join">
@@ -110,7 +115,7 @@
   </script>
 <!-- Move This -->
   <script id="startGameTemplate" type="x-tmpl-mustache">
-    <form id="startGameForm" action="/games/start" method="POST">
+    <form id="startGameForm" action="/games/start/{{ gameID }}" method="POST">
       <input type="hidden" name="playerID" value={{ playerID }}>
       <input type="hidden" name="gameID" value={{ gameID }}>
       <input type="submit" value="Start Game">
@@ -124,6 +129,7 @@
       <input type="submit" value="Refresh">
     </form>
   </script>
+  <!-- Remove This -->
   <script id="guessTemplate" type="x-tmpl-mustache">
     <form id="guessForm" action="/games/play" method="POST">
       <input type="text" name="guess" value="">

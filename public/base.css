@@ -1,6 +1,6 @@
 body { 
     font: 13px Helvetica, Arial;
-    background-color: #C63D0F; 
+    background-color: #7E8F7C; 
 }
 #createGameForm select {
     min-width: 10em;
@@ -38,18 +38,19 @@ td.letterCell {
 }
 /*End Game Interface*/
 /*Chat */
+
 #chat{
-    background-color: #7E8F7C;
+    background-color: ;
     height: 20em;
 }
 .messages{
-    background-color: #7E8F7C;
+    background-color: #C63D0F;
     min-height: 15em;
     max-height:15em;
 }
 .formBox{
     padding: 0;
-    background-color: #7E8F7C;
+    background-color: #C63D0F;
     height: 4em;
     max-height: 4em;
 }

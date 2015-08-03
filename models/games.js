@@ -1,3 +1,44 @@
+var db = require("../db");
+
+function gameInsert(game, cb){
+    var cursor = db.collection("games");
+    cursor.insert(game.shard());
+    cb(game);
+}
+
+function gameFind(key, cb){
+    var cursor = db.collection("games");
+    cursor.find({'gameKey':key}).toArray(function(err,docs){
+        if(err){
+            cb(err);
+        }
+        else{
+            var board = docs[0]['board'];
+            var admin = docs[0]['admin'];
+            // Find Better Way
+            game = new WordSearch(docs[0]['admin'],docs[0]['board']);
+            game.gameKey = docs[0]['gameKey'];
+            game.currentTurn = docs[0]['currentTurn'];
+            game.consecutivePasses = docs[0]['consecutivePasses'];
+            game.players = docs[0]['players'];
+            game.foundWords = docs[0]['foundWords'];
+            game.gameStatus = docs[0]['gameStatus'];
+            cb(null, game);
+        }
+    });
+}
+function gameUpdate(game, cb){
+    var cursor = db.collection("games");
+    console.log(game.players);
+    cursor.findAndModify(
+        {'gameKey':game.gameKey},
+        [['_id','asc']],
+        {$set: game.shard()},
+        {},
+        cb
+    );
+}
+
 function Player(nickname, key){
     this.nickname = nickname;
     this.key = key;
@@ -16,6 +57,18 @@ function WordSearch(admin, board){
     this.foundWords = [];
     // "Building","Waiting","In Play","Complete"
     this.gameStatus = "Building";
+}
+WordSearch.prototype.shard = function(){
+    return {
+        'admin': this.admin,
+        'gameKey': this.gameKey,
+        'currentTurn': this.currentTurn,
+        'consecutivePasses':this.consecutivePasses,
+        'players': this.players,
+        'board': this.board,
+        'foundWords': this.foundWords,
+        'gameStatus': this.gameStatus
+    }
 }
 WordSearch.prototype.setup = function(){
     this.board.setup();
@@ -247,7 +300,15 @@ Search.prototype.checkSurround = function(cooordinate, word){
     }
 }
 
-module.exports = {'Player': Player,'game': WordSearch, 'board': Board, 'search': Search};
+module.exports = {
+    'Player': Player,
+    'game': WordSearch, 
+    'board': Board, 
+    'search': Search,
+    'gameFind': gameFind,
+    'gameInsert': gameInsert,
+    'gameUpdate': gameUpdate,
+};
 
 if(!module.parent){
     // TESTS Should Replace This
