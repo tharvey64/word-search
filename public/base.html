@@ -106,7 +106,7 @@
   </script>
   <script id="gameInviteTemplate" type="x-tmpl-mustache">
     <li>{{admin}} has invited you to a game: 
-      <form id="gameInvitationForm" action="/games/join" method="POST">
+      <form id="gameInvitationForm" action="/games/join/{{ gameID }}" method="POST">
         <input type="hidden" name="nickname" value={{ nickname }}>
         <input type="hidden" name="gameID" value={{ gameID }}>
         <input type="submit" value="Join">
@@ -115,7 +115,7 @@
   </script>
 <!-- Move This -->
   <script id="startGameTemplate" type="x-tmpl-mustache">
-    <form id="startGameForm" action="/games/start" method="POST">
+    <form id="startGameForm" action="/games/start/{{ gameID }}" method="POST">
       <input type="hidden" name="playerID" value={{ playerID }}>
       <input type="hidden" name="gameID" value={{ gameID }}>
       <input type="submit" value="Start Game">

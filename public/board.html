@@ -20,7 +20,7 @@
         </ul>
       </div>
       <div id="guessBox">
-        <form id="guessForm" action="/games/play" method="POST">
+        <form id="guessForm" action="/games/play/{{gameID}}" method="POST">
           <input type="hidden" name="playerID" value="{{playerID}}">
           <input type="hidden" name="gameID" value="{{gameID}}">
           <input type="hidden" name="word" value="">

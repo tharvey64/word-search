@@ -82,35 +82,27 @@ router.get('/create/:game/:nickname/:player', function(req, res){
     res.json({'playerID': player, 'nickname': nickname, 'gameID': game.gameKey});
 });
 // create instance of game
-router.post('/join', function(req, res){
-    var gameID = req.body.gameID;
+router.post('/join/:game', function(req, res){
+    var game = req.params.game;
     var nickname = req.body.nickname || "Guest" + make.key();
     var newPlayer = new gameModels.Player(nickname, make.key());
     
     console.log("gameFind");
     console.log(gameID);
 
-    gameModels.gameFind(gameID,function(err,game){
-        if (err){
-            res.status(404).send({'error':"Game Not Found."});
-            return false;
+    if(game.gameStatus == "Building" || game.gameStatus == "Waiting"){
+        console.log("Joinning")
+        if (game.joinGame(newPlayer)){
+            gameModels.gameUpdate(game,function(err,obj){
+                console.log(err);
+                console.log(obj);
+                res.redirect('/games/join/' + game.gameKey + '/' + newPlayer.key + '/' + nickname);
+            });
         }
-        else if(game.gameStatus == "Building" || game.gameStatus == "Waiting"){
-            console.log("Joinning")
-            if (game.joinGame(newPlayer)){
-                gameModels.gameUpdate(game,function(err,obj){
-                    console.log(err);
-                    console.log(obj);
-                    res.redirect('/games/join/' + game.gameKey + '/' + newPlayer.key + '/' + nickname);
-                });
-            }
-        }
-        else{
-            res.redirect('/games/join/' + game.gameKey + '/' + newPlayer.key + '/' + nickname);
-        }
-    });
-
-
+    }
+    else{
+        res.redirect('/games/join/' + game.gameKey + '/' + newPlayer.key + '/' + nickname);
+    }
 });
 
 router.get('/join/:game/:player/:nickname', function(req, res){
@@ -128,24 +120,16 @@ router.get('/join/:game/:player/:nickname', function(req, res){
 });
 
 
-router.post('/start', function(req, res){
-    // Some Of this stuff must be middleware
-    var gameID = req.body.gameID;
+router.post('/start/:game', function(req, res){
+    var game = req.params.game;
     var playerID = req.body.playerID;
     // ----------------------------------------
-    // This Should be middleware use app.use
-    gameModels.gameFind(gameID,function(err,game){
-        if (err){
-            res.status(404).send({'error':"Game Not Found."});
-            return false;
-        }
-        // ---------------------------------------- 
-        if (game.admin.key == playerID){
-            game.gameStatus = "In Play";
-            game.currentTurn = (Math.random()*game.players.length)|0;
-        }
+    if (game.admin.key == playerID){
+        game.gameStatus = "In Play";
+        game.currentTurn = (Math.random()*game.players.length)|0;
+    }
         // ^^^^^^This Should be a WordSearch prototype^^^^^^
-        res.redirect('/games/start/' + gameID);
+    res.redirect('/games/start/' + game.gameID);
     });
 });
 
@@ -178,38 +162,32 @@ router.get('/info/:game', function(req, res){
     });
 });
 // FIX
-router.post('/play', function(req, res){
+router.post('/play/:game', function(req, res){
     var playerID = req.body.playerID,
-    gameID = req.body.gameID,
+    game = req.params.game,
     coordinates = req.body.word,
     letters = req.body.guess;
-    // DB CODE
-    gameModels.gameFind(gameID,function(err,game){
-        if (err){
-            res.status(404).send({'error':"Game Not Found."});
-            return false;
-        }
-        var turn = game.currentTurn;
-        if (game.gameStatus == "Complete"){
-            res.json({'success': false,'score': 0, 'message': 'The Game Is Over.'});
-        }
-        else if (game.players[turn].key != playerID){
-            res.redirect('/games/play/-1');
-        }
-        else if (letters.length == 0){
-            game.pass();
+    
+    var turn = game.currentTurn;
+    if (game.gameStatus == "Complete"){
+        res.json({'success': false,'score': 0, 'message': 'The Game Is Over.'});
+    }
+    else if (game.players[turn].key != playerID){
+        res.redirect('/games/play/-1');
+    }
+    else if (letters.length == 0){
+        game.pass();
+        res.redirect('/games/play/0');
+    }
+    else{
+        var guess = {'word':letters,'coordinates': coordinates.split(";")}
+        if (!game.checkGuess(playerID,guess)){
             res.redirect('/games/play/0');
         }
         else{
-            var guess = {'word':letters,'coordinates': coordinates.split(";")}
-            if (!game.checkGuess(playerID,guess)){
-                res.redirect('/games/play/0');
-            }
-            else{
-                res.redirect('/games/play/' + (letters.length).toString());
-            }
+            res.redirect('/games/play/' + (letters.length).toString());
         }
-    });
+    }
 });
 
 router.get('/play/:score', function(req, res){

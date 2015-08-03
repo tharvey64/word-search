@@ -88,6 +88,7 @@ $(document).ready(function(){
 	});
 	$('#messageForm').on('submit', function(event){
 		event.preventDefault();
+		// Good Dammit Change All Of This Stuff to JQUERY
 		var message = this.elements.mainM.value;
 		// Message Appended To Submiters Screen
 		var item = $('<li>')
@@ -101,6 +102,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		$('div.active').hide();
 		$('.active').toggleClass('active');
+		// Change This To Jquery
 		$(this.dataset.target).toggleClass('active');
 		$('div.active').show();
 	});
@@ -147,8 +149,9 @@ $(document).ready(function(){
 	// Deactivate The Join Buttons After The Game Starts
 	$('#chat').on('submit', '#gameInvitationForm', function(event){
 		event.preventDefault();
-		var room = this.elements.gameID.value
-		$.post("/games/join", $(this).serialize(), function(data){
+		var form = $(this);
+		var room = form.children("input[name='gameID']").val();
+		$.post(form.attr("action").val(), form.serialize(), function(data){
 			if (data.registered){
 				playerID = data.playerID
 				socket.emit('join game', room);
@@ -170,8 +173,9 @@ $(document).ready(function(){
 	// Move This To Game Lobby
 	$('#createGame').on('submit', '#startGameForm',function(event){
 		event.preventDefault();
-		var gameID = this.elements.gameID.value
-		$.post('/games/start/',$(this).serialize(),function(data){
+		var form = $(this);
+		var gameID = form.children("input[name='gameID']").val();
+		$.post(form.attr("action").val(),form.serialize(),function(data){
 			if (!data.success){
 				return false;
 			}
