@@ -82,7 +82,7 @@ $(document).ready(function(){
                 form.elements.word.value = currentGuess.join(";");
             }
 
-            $.post($(form).attr("action").val(),$(form).serialize(),function(data){
+            $.post($(form).attr("action"),$(form).serialize(),function(data){
                 // create event to be triggered
                 if(!data.success){
                     var message = $('<p>').text(data.message);

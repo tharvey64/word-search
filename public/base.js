@@ -151,7 +151,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		var form = $(this);
 		var room = form.children("input[name='gameID']").val();
-		$.post(form.attr("action").val(), form.serialize(), function(data){
+		$.post(form.attr("action"), form.serialize(), function(data){
 			if (data.registered){
 				playerID = data.playerID
 				socket.emit('join game', room);
@@ -175,7 +175,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		var form = $(this);
 		var gameID = form.children("input[name='gameID']").val();
-		$.post(form.attr("action").val(),form.serialize(),function(data){
+		$.post(form.attr("action"),form.serialize(),function(data){
 			if (!data.success){
 				return false;
 			}

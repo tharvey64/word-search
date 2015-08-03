@@ -33,7 +33,7 @@ function gameUpdate(game, cb){
     cursor.findAndModify(
         {'gameKey':game.gameKey},
         [['_id','asc']],
-        {$set: {'players': game.players}},
+        {$set: game.shard()},
         {},
         cb
     );

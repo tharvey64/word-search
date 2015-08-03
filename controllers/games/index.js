@@ -9,17 +9,7 @@ var gameModels = require("../../models/games");
 
 var Words = require("../../models/words");
 
-// ----------------------------------------
-// Need to Either call it gameKey or gameID
-// ----------------------------------------
-
-// Fake DB For Development
-var games = {};
-
-
 router.param('game', function(req,res,next,id){
-    console.log("Param GameFind");
-    console.log(id);
     gameModels.gameFind(id,function(err,game){
         if (err){
             res.status(404).send({error:"Game Not Found."});
@@ -51,9 +41,7 @@ router.post('/create', function(req, res){
 
     var gameID = make.key();
     admin.gameKey = gameID;
-    // Put the gameID,nickname,and player key in the res body
-    // create game
-    // ------------------------------------------------ 
+
     var currentGame = new gameModels.game(admin, new gameModels.board());
     //Test Validation Speed 
     // testSearch.repeat(games[gameID],gameModels.search);
@@ -63,7 +51,7 @@ router.post('/create', function(req, res){
             if (!game.validateBoard(gameModels.search, docs)){
                 repeater(game.setup());
             }else{
-                console.log("Success");
+                // console.log("Success");
                 gameModels.gameInsert(game, function(status){
                     // redirect moved to call back
                     res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.key);
@@ -86,16 +74,11 @@ router.post('/join/:game', function(req, res){
     var game = req.params.game;
     var nickname = req.body.nickname || "Guest" + make.key();
     var newPlayer = new gameModels.Player(nickname, make.key());
-    
     console.log("gameFind");
-    console.log(gameID);
 
     if(game.gameStatus == "Building" || game.gameStatus == "Waiting"){
-        console.log("Joinning")
         if (game.joinGame(newPlayer)){
             gameModels.gameUpdate(game,function(err,obj){
-                console.log(err);
-                console.log(obj);
                 res.redirect('/games/join/' + game.gameKey + '/' + newPlayer.key + '/' + nickname);
             });
         }
@@ -123,18 +106,23 @@ router.get('/join/:game/:player/:nickname', function(req, res){
 router.post('/start/:game', function(req, res){
     var game = req.params.game;
     var playerID = req.body.playerID;
-    // ----------------------------------------
+    // There Should Be A Game Method That Verifies This
     if (game.admin.key == playerID){
         game.gameStatus = "In Play";
         game.currentTurn = (Math.random()*game.players.length)|0;
+        gameModels.gameUpdate(game,function(err,obj){
+                res.redirect('/games/start/' + game.gameKey);
+        });
     }
+    else{
         // ^^^^^^This Should be a WordSearch prototype^^^^^^
-    res.redirect('/games/start/' + game.gameID);
-    });
+        res.redirect('/games/start/' + game.gameKey);
+    }
 });
 
 router.get('/start/:game', function(req, res){
     var game = req.params.game;
+    console.log("Status",game.gameStatus)
     if (game.gameStatus == "In Play"){
         res.json({'success': true, 'message': "In Play", 'grid': game.board.letters});
     }
@@ -167,26 +155,35 @@ router.post('/play/:game', function(req, res){
     game = req.params.game,
     coordinates = req.body.word,
     letters = req.body.guess;
-    
     var turn = game.currentTurn;
+    var score = "0";
     if (game.gameStatus == "Complete"){
         res.json({'success': false,'score': 0, 'message': 'The Game Is Over.'});
     }
     else if (game.players[turn].key != playerID){
-        res.redirect('/games/play/-1');
+        score = "-1";
     }
     else if (letters.length == 0){
         game.pass();
-        res.redirect('/games/play/0');
     }
     else{
         var guess = {'word':letters,'coordinates': coordinates.split(";")}
         if (!game.checkGuess(playerID,guess)){
-            res.redirect('/games/play/0');
+            score = "0";
         }
         else{
-            res.redirect('/games/play/' + (letters.length).toString());
+            score = letters.length.toString();
         }
+    }
+    var url = '/games/play/'+score
+    if (score === "-1"){
+        res.redirect(url);
+    }
+    else{
+        gameModels.gameUpdate(game,function(err,obj){
+            // Do Something With the Error
+            res.redirect(url);
+        }); 
     }
 });
 
