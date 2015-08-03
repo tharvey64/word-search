@@ -17,13 +17,18 @@
   </head>
 
   <body>
+    <div id="header" class="page-header">
+      <h1>Wa-Wa-Wa-Word Search</h3>
+    </div>
+
     <div class="container-fluid">
+
       <div id="createGame" class="container-fluid">
         <form id="createGameForm" action="/games/create" method="POST">
           <fieldset>
             <legend>Create Game</legend>
             <div class="form-group">
-              <label for="userList">Select your opponents.</p>
+              <label for="userList">Select your opponents.</label>
               <select class="form-control" id="userList" multiple></select>
               <input type="hidden" name="nickname">
               <button type="submit" class="btn btn-default btn-block">Submit</button>
@@ -124,6 +129,7 @@
       <input type="submit" value="Refresh">
     </form>
   </script>
+  <!-- Remove This -->
   <script id="guessTemplate" type="x-tmpl-mustache">
     <form id="guessForm" action="/games/play" method="POST">
       <input type="text" name="guess" value="">

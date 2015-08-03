@@ -18,15 +18,18 @@ var games = {};
 
 
 router.param('game', function(req,res,next,id){
-    // This Is Where you would hit the DB To Locate The Game
-    if (!games[id]){
-        res.status(404).send({error:"Game Not Found."});
-        return;
-    }
-    else{
-        req.params.game = games[id];
-        next();
-    }
+    console.log("Param GameFind");
+    console.log(id);
+    gameModels.gameFind(id,function(err,game){
+        if (err){
+            res.status(404).send({error:"Game Not Found."});
+            return;
+        }
+        else{
+            req.params.game = game;
+            next();
+        }
+    });
 });
 // router.param('player', function(req,res,next,id){
 //     // This Is Where you would hit the DB To Locate The Game
@@ -49,18 +52,25 @@ router.post('/create', function(req, res){
     var gameID = make.key();
     admin.gameKey = gameID;
     // Put the gameID,nickname,and player key in the res body
-    res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.key);
     // create game
     // ------------------------------------------------ 
-    games[gameID] = new gameModels.game(admin, new gameModels.board());
+    var currentGame = new gameModels.game(admin, new gameModels.board());
     //Test Validation Speed 
     // testSearch.repeat(games[gameID],gameModels.search);
 
     (function repeater(game){
         Words.startsWith(game.setup(), function(err, docs){
-            if (!games[gameID].validateBoard(gameModels.search, docs)) repeater(game.setup());
+            if (!game.validateBoard(gameModels.search, docs)){
+                repeater(game.setup());
+            }else{
+                console.log("Success");
+                gameModels.gameInsert(game, function(status){
+                    // redirect moved to call back
+                    res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.key);
+                });
+            }
         });
-    })(games[gameID]);
+    })(currentGame);
 });
 
 router.get('/create/:game/:nickname/:player', function(req, res){
@@ -71,25 +81,43 @@ router.get('/create/:game/:nickname/:player', function(req, res){
     // send html back 
     res.json({'playerID': player, 'nickname': nickname, 'gameID': game.gameKey});
 });
-
+// create instance of game
 router.post('/join', function(req, res){
     var gameID = req.body.gameID;
     var nickname = req.body.nickname || "Guest" + make.key();
     var newPlayer = new gameModels.Player(nickname, make.key());
+    
+    console.log("gameFind");
+    console.log(gameID);
 
-    if (!games[gameID]){
-        res.status(404).send({'error':"Game Not Found."});
-        return false;
-    }
-    else if(games[gameID].gameStatus == "Building" || games[gameID].gameStatus == "Waiting"){
-        games[gameID].joinGame(newPlayer);
-    }
-    res.redirect('/games/join/' + gameID + '/' + newPlayer.key + '/' + nickname);
+    gameModels.gameFind(gameID,function(err,game){
+        if (err){
+            res.status(404).send({'error':"Game Not Found."});
+            return false;
+        }
+        else if(game.gameStatus == "Building" || game.gameStatus == "Waiting"){
+            console.log("Joinning")
+            if (game.joinGame(newPlayer)){
+                gameModels.gameUpdate(game,function(err,obj){
+                    console.log(err);
+                    console.log(obj);
+                    res.redirect('/games/join/' + game.gameKey + '/' + newPlayer.key + '/' + nickname);
+                });
+            }
+        }
+        else{
+            res.redirect('/games/join/' + game.gameKey + '/' + newPlayer.key + '/' + nickname);
+        }
+    });
+
+
 });
 
 router.get('/join/:game/:player/:nickname', function(req, res){
     var game = req.params.game;
+    console.log(game);
     var player = new gameModels.Player(req.params.nickname, req.params.player);
+    console.log(game.isPlayer(player));
     if (game.isPlayer(player)){
         res.json({'registered': true,'playerID': player.key,'nickname': player.nickname});
         // Redirect To Waiting Lobby
@@ -104,20 +132,21 @@ router.post('/start', function(req, res){
     // Some Of this stuff must be middleware
     var gameID = req.body.gameID;
     var playerID = req.body.playerID;
-
     // ----------------------------------------
     // This Should be middleware use app.use
-    if (!games[gameID]){
-        res.status(404).send({'error':"Game Not Found."});
-        return false;
-    }
-    // ---------------------------------------- 
-    if (games[gameID].admin.key == playerID){
-        games[gameID].gameStatus = "In Play";
-        games[gameID].currentTurn = (Math.random()*games[gameID].players.length)|0;
-    }
-    // ^^^^^^This Should be a WordSearch prototype^^^^^^
-    res.redirect('/games/start/' + gameID);
+    gameModels.gameFind(gameID,function(err,game){
+        if (err){
+            res.status(404).send({'error':"Game Not Found."});
+            return false;
+        }
+        // ---------------------------------------- 
+        if (game.admin.key == playerID){
+            game.gameStatus = "In Play";
+            game.currentTurn = (Math.random()*game.players.length)|0;
+        }
+        // ^^^^^^This Should be a WordSearch prototype^^^^^^
+        res.redirect('/games/start/' + gameID);
+    });
 });
 
 router.get('/start/:game', function(req, res){
@@ -128,7 +157,6 @@ router.get('/start/:game', function(req, res){
     else{
         res.json({'success': false, 'message': "Waiting", 'grid': null});
     }
-    console.log(game.board.answers);
 });
 
 // Temporary Url
@@ -149,36 +177,39 @@ router.get('/info/:game', function(req, res){
         'grid': game.board.letters
     });
 });
-
+// FIX
 router.post('/play', function(req, res){
     var playerID = req.body.playerID,
     gameID = req.body.gameID,
     coordinates = req.body.word,
     letters = req.body.guess;
-    var turn = games[gameID].currentTurn;
-    if (!games[gameID]){
-        res.status(404).send({'error':"Game Not Found."});
-        return false;
-    }
-    else if (games[gameID].gameStatus == "Complete"){
-        res.json({'success': false,'score': 0, 'message': 'The Game Is Over.'});
-    }
-    else if (games[gameID].players[turn].key != playerID){
-        res.redirect('/games/play/-1');
-    }
-    else if (letters.length == 0){
-        games[gameID].pass();
-        res.redirect('/games/play/0');
-    }
-    else{
-        var guess = {'word':letters,'coordinates': coordinates.split(";")}
-        if (!games[gameID].checkGuess(playerID,guess)){
+    // DB CODE
+    gameModels.gameFind(gameID,function(err,game){
+        if (err){
+            res.status(404).send({'error':"Game Not Found."});
+            return false;
+        }
+        var turn = game.currentTurn;
+        if (game.gameStatus == "Complete"){
+            res.json({'success': false,'score': 0, 'message': 'The Game Is Over.'});
+        }
+        else if (game.players[turn].key != playerID){
+            res.redirect('/games/play/-1');
+        }
+        else if (letters.length == 0){
+            game.pass();
             res.redirect('/games/play/0');
         }
         else{
-            res.redirect('/games/play/' + (letters.length).toString());
+            var guess = {'word':letters,'coordinates': coordinates.split(";")}
+            if (!game.checkGuess(playerID,guess)){
+                res.redirect('/games/play/0');
+            }
+            else{
+                res.redirect('/games/play/' + (letters.length).toString());
+            }
         }
-    }
+    });
 });
 
 router.get('/play/:score', function(req, res){
@@ -189,7 +220,6 @@ router.get('/play/:score', function(req, res){
     else{
         res.json({'success': false,'score': 0, 'message': 'It is not your turn'});
     }
-    // this needs success and score
 });
 
 router.get('/board', function(req, res){
