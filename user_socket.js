@@ -1,3 +1,4 @@
+var make = require('./lib/idGenerator');
 var connected = {};
 var mainLobby = {};
 
@@ -6,6 +7,10 @@ exports.live = function(tempIO){
         var name;
 
         socket.on('userName', function(userName){
+            if (userName === ""){
+                var userName = "Guest" + make.key();
+                socket.emit('generated name', userName);
+            }
             if (connected.hasOwnProperty(userName)){
                 socket.emit('userName taken', userName);
             }

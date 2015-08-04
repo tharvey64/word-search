@@ -5,7 +5,6 @@ function gameInsert(game, cb){
     cursor.insert(game.shard());
     cb(game);
 }
-
 function gameFind(key, cb){
     var cursor = db.collection("games");
     cursor.find({'gameKey':key}).toArray(function(err,docs){
@@ -29,7 +28,6 @@ function gameFind(key, cb){
 }
 function gameUpdate(game, cb){
     var cursor = db.collection("games");
-    console.log(game.players);
     cursor.findAndModify(
         {'gameKey':game.gameKey},
         [['_id','asc']],
@@ -89,7 +87,7 @@ WordSearch.prototype.validateBoard = function(searcher, wordList){
     return true;
 }
 WordSearch.prototype.checkGuess = function(playerKey, guess){
-    // Returning false Here is misleading
+    // Re design  this method
     if (playerKey != this.players[this.currentTurn].key) return false;
     var player = this.players[this.currentTurn];
     // guess = {'word': guess word string,'coordinates':guess coordinates array}

@@ -1,10 +1,10 @@
-<div id="gameInterface">
-  <div class="col-md-4 pull-left panel panel-default" id="gameData">
+<div id="gameInterface" class="container-fluid">
+  <div class="col-xs-4 pull-left panel panel-default" id="gameData">
     <div class="panel-body">
       <div id="playerListBox">
         <p>{{gameStatus}}</p>
+        <p id="currentTurn" class="lead">{{currentPlayer}}</p>
         <h2 class="label label-primary">Player List</h2>
-        <p class="lead">{{currentPlayer}}</p>
         <ol class="list-unstyled">
           {{#turnSeq}}
           <li class="list-group-item list-group-item-info">{{.}}</li>
@@ -20,12 +20,19 @@
         </ul>
       </div>
       <div id="guessBox">
-        <form id="guessForm" action="/games/play/{{gameID}}" method="POST">
+        <form id="guessForm" class="form-inline" action="/games/play/{{gameID}}" method="POST">
           <input type="hidden" name="playerID" value="{{playerID}}">
           <input type="hidden" name="gameID" value="{{gameID}}">
           <input type="hidden" name="word" value="">
-          <input readonly name="guess">
-          <input type="Submit" name="wordSubmission" value="Pass">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">Guess</div>
+              <label class="sr-only" for="visibleInput">Guess</label>
+              <input type="text" name="guess" class="form-control" id="visibleInput" readonly>
+            </div>
+            <button type="submit" name="wordSubmission" class="btn btn-block btn-info">Pass</button>
+          </div>
+          <!-- <input type="Submit" name="wordSubmission" value="Pass"> -->
         </form>
       </div>
       <div id="gameAlertsBox">
@@ -43,7 +50,7 @@
       </div>
     </div>
   </div>
-  <div class="col-lg-8 pull-right jumbotron" id="grid">
+  <div class="col-xs-8 pull-right jumbotron" id="grid">
     <h2>{{nickname}}</h2>
     <table>
         <tbody>
