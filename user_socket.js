@@ -1,4 +1,4 @@
-var gameModels = require("../../models/games");
+var gameModels = require("./models/games");
 var make = require('./lib/idGenerator');
 var connected = {};
 var mainLobby = {};
@@ -65,6 +65,7 @@ exports.live = function(tempIO){
             delete connected[name];
             var game = gameModels.removePlayer(name);
             game.quitGame(name);
+            gameModels.gameUpdate(game);
             tempIO.to(game.gameKey).emit('get game state', game.gameKey);
             tempIO.emit('sendUsers', Object.keys(mainLobby));
         });

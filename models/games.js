@@ -19,7 +19,7 @@ function gameFind(key, cb){
 }
 function removePlayer(name, cb){
     var cursor = db.collection("games");
-    cursor.find({'players'{$elemMatch: {'nickname':name}}}).toArray(function(err,docs){
+    cursor.find({'gameStatus': { $ne: 'Complete'},'players':{$elemMatch: {'nickname':name}}}).toArray(function(err,docs){
         if(err){
             cb(err);
         }
@@ -72,18 +72,6 @@ function WordSearch(admin, board){
     this.foundWords = [];
     // "Building","Waiting","In Play","Complete"
     this.gameStatus = "Building";
-}
-WordSearch.prototype.shard = function(){
-    return {
-        'admin': this.admin,
-        'gameKey': this.gameKey,
-        'currentTurn': this.currentTurn,
-        'consecutivePasses':this.consecutivePasses,
-        'players': this.players,
-        'board': this.board,
-        'foundWords': this.foundWords,
-        'gameStatus': this.gameStatus
-    }
 }
 WordSearch.prototype.setup = function(){
     this.board.setup();
