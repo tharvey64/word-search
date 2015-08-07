@@ -2,7 +2,7 @@ var db = require("../db");
 
 function gameInsert(game, cb){
     var cursor = db.collection("games");
-    cursor.insert(game.shard());
+    cursor.insert(game);
     cb(game);
 }
 // pass query here
@@ -13,7 +13,7 @@ function gameFind(key, cb){
             cb(err);
         }
         else{
-            cb(null, buildGame(doc[0]));
+            cb(null, buildGame(docs[0]));
         }
     });
 }
@@ -24,7 +24,7 @@ function removePlayer(name, cb){
             cb(err);
         }
         else{
-            cb(null, buildGame(doc[0]));
+            cb(null, buildGame(docs[0]));
         }
     });
 }
@@ -33,23 +33,26 @@ function gameUpdate(game, cb){
     cursor.findAndModify(
         {'gameKey':game.gameKey},
         [['_id','asc']],
-        {$set: game.shard()},
+        {$set: game},
         {},
         cb
     );
 }
 
 function buildGame(doc){
-    var board = docs['board'];
-    var admin = docs['admin'];
+    if (!doc){
+        return null
+    }
+    var board = doc['board'];
+    var admin = doc['admin'];
     // Find Better Way
-    game = new WordSearch(docs['admin'],docs['board']);
-    game.gameKey = docs['gameKey'];
-    game.currentTurn = docs['currentTurn'];
-    game.consecutivePasses = docs['consecutivePasses'];
-    game.players = docs['players'];
-    game.foundWords = docs['foundWords'];
-    game.gameStatus = docs['gameStatus'];
+    game = new WordSearch(doc['admin'],doc['board']);
+    game.gameKey = doc['gameKey'];
+    game.currentTurn = doc['currentTurn'];
+    game.consecutivePasses = doc['consecutivePasses'];
+    game.players = doc['players'];
+    game.foundWords = doc['foundWords'];
+    game.gameStatus = doc['gameStatus'];
     return game
 }
 
@@ -184,11 +187,8 @@ WordSearch.prototype.quitGame = function(username) {
     var count = this.players.length;
     for (var i = 0; i < count; i++){
         if (username == this.players[i].nickname){
-            // if (this.players[this.currentTurn].nickname == username){
-            //     this.currentTurn += 1;
-            //     this.currentTurn %= this.players.length;
-            // }
-            this.players.splice(index, 1);
+            this.players.splice(i, 1);
+            this.currentTurn %= this.players.length;
             return true;
         }
     }

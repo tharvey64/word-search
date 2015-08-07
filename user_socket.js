@@ -63,11 +63,15 @@ exports.live = function(tempIO){
             tempIO.emit('chat message', name + " logged out.");
             delete mainLobby[name];
             delete connected[name];
-            var game = gameModels.removePlayer(name);
-            game.quitGame(name);
-            gameModels.gameUpdate(game);
-            tempIO.to(game.gameKey).emit('get game state', game.gameKey);
-            tempIO.emit('sendUsers', Object.keys(mainLobby));
+            gameModels.removePlayer(name,function(err, game){
+                if (game){
+                    game.quitGame(name);
+                    gameModels.gameUpdate(game, function(err, data){
+                        tempIO.to(data.value.gameKey).emit('get game state', data.value.gameKey);
+                    });
+                }
+                tempIO.emit('sendUsers', Object.keys(mainLobby));
+            });
         });
     });
 }
