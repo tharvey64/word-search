@@ -1,14 +1,28 @@
 body { 
     font: 13px Helvetica, Arial;
-    background-color: #7E8F7C; 
+    /*background-color: #7E8F7C; */
+    /*Gray*/
+    background-color: #ddd;
+    /*Orange*/
+    /*background-color: #C63D0F;*/
+    /*Vanilla?*/
+    /*background-color: #FDF3E7;*/
 }
 #createGameForm select {
     min-width: 10em;
-    background-color: #FDF3E7;
+    background-color: #7E8F7C;
+    /*background-color: #FDF3E7;*/
+}
+#createGame {
+    min-height: 12em;
 }
 /*Game Interface*/
-#grid,#gameData{
+
+#grid,#gameData, #gameData > div{
+    background-color: #7E8F7C;
+    /*background-color: #C63D0F;*/
     display: inline-block;
+    height:100%;
 }
 td.letterCell {
     padding: 0;
@@ -36,7 +50,7 @@ td.letterCell {
     min-height: 5em;
     max-height: 10em;
 }
-/*End Game Interface*/
+/*End Of Game Interface*/
 /*Chat */
 
 #chat{

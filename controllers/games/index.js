@@ -51,7 +51,6 @@ router.post('/create', function(req, res){
             if (!game.validateBoard(gameModels.search, docs)){
                 repeater(game.setup());
             }else{
-                // console.log("Success");
                 gameModels.gameInsert(game, function(status){
                     // redirect moved to call back
                     res.redirect('/games/create/' + gameID + '/' + nickname + '/' + admin.key);
@@ -74,7 +73,6 @@ router.post('/join/:game', function(req, res){
     var game = req.params.game;
     var nickname = req.body.nickname || "Guest" + make.key();
     var newPlayer = new gameModels.Player(nickname, make.key());
-    console.log("gameFind");
 
     if(game.gameStatus == "Building" || game.gameStatus == "Waiting"){
         if (game.joinGame(newPlayer)){
@@ -90,9 +88,7 @@ router.post('/join/:game', function(req, res){
 
 router.get('/join/:game/:player/:nickname', function(req, res){
     var game = req.params.game;
-    console.log(game);
     var player = new gameModels.Player(req.params.nickname, req.params.player);
-    console.log(game.isPlayer(player));
     if (game.isPlayer(player)){
         res.json({'registered': true,'playerID': player.key,'nickname': player.nickname});
         // Redirect To Waiting Lobby
@@ -122,7 +118,6 @@ router.post('/start/:game', function(req, res){
 
 router.get('/start/:game', function(req, res){
     var game = req.params.game;
-    console.log("Status",game.gameStatus)
     if (game.gameStatus == "In Play"){
         res.json({'success': true, 'message': "In Play", 'grid': game.board.letters});
     }
@@ -159,6 +154,7 @@ router.post('/play/:game', function(req, res){
     var score = "0";
     if (game.gameStatus == "Complete"){
         res.json({'success': false,'score': 0, 'message': 'The Game Is Over.'});
+        return;
     }
     else if (game.players[turn].key != playerID){
         score = "-1";
@@ -178,11 +174,13 @@ router.post('/play/:game', function(req, res){
     var url = '/games/play/'+score
     if (score === "-1"){
         res.redirect(url);
+        return;
     }
     else{
         gameModels.gameUpdate(game,function(err,obj){
             // Do Something With the Error
             res.redirect(url);
+            return;
         }); 
     }
 });

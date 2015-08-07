@@ -1,6 +1,6 @@
 function mainLobby(nickname){
 	var gameCreationTemplate = $('#createGameFormTemplate').html();
-	$('#createGame').empty()
+	$('#createGame').empty();
 	Mustache.parse(gameCreationTemplate);
 	var rendered = Mustache.render(gameCreationTemplate);
 	$('#createGame').append(rendered);
@@ -33,11 +33,15 @@ function buildBoard(gameID, playerID, nickname, socket){
 				data['nickname'] = nickname;
 				var board = Mustache.render(boardTemplate, data);
 				$('#createGame').html(board);
+				if (nickname != data['currentPlayer']){
+					$('button[name="wordSubmission"]').attr("disabled","disabled");
+				}
+				else{
+					$('#currentTurn').html("It Is Your Turn.");
+				}
 			}
-			console.log('Callback');
 		});
 	});
-	console.log(gameOver);
 	return gameOver;
 }
 function gameChat(gameID){
@@ -58,6 +62,10 @@ $(document).ready(function(){
 	$("#createGameForm input[name='nickname']").val(nickname);
 	
 	// Confirm Username Has Not Been Taken
+	socket.on('generated name', function(name){
+		nickname = name;
+	});
+
 	socket.on('userName taken', function(name){
 		// Make This Happen on success or failure
 		// Loop until success
@@ -77,25 +85,24 @@ $(document).ready(function(){
 	// Message Sending
 	$('#chat').on('submit', '#gameMessageForm',function(event){
 		event.preventDefault();
-		var message = this.elements.gameM.value;
-		var gameID = this.elements.gameID.value;
+		var message = $(this).children("input[name='gameM']").val();
+		var gameID = $(this).children("input[name='gameID']").val();
 		// Message Appended To Submiters Screen
 		var item = $('<li>')
 		item.attr("class","sentMessage");
 		$('#gameMessages').append(item.text("Me: " + message));
 		socket.emit('game message', nickname + ": " + message, gameID);
-		this.elements.gameM.value = "";
+		$(this).children("input[name='gameM']").val("");
 	});
 	$('#messageForm').on('submit', function(event){
 		event.preventDefault();
-		// Good Dammit Change All Of This Stuff to JQUERY
-		var message = this.elements.mainM.value;
+		var message = $(this).children("input[name='mainM']").val();
 		// Message Appended To Submiters Screen
 		var item = $('<li>')
 		item.attr("class","sentMessage");
 		$('#mainMessages').append(item.text("Me: " + message));
 		socket.emit('chat message', nickname + ": " + message);
-		this.elements.mainM.value = "";
+		$(this).children("input[name='mainM']").val("");
 	});
 	// Chat Toggle
 	$('#chatTabs').on('click', 'li',function(event){

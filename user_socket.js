@@ -1,3 +1,5 @@
+var gameModels = require("./models/games");
+var make = require('./lib/idGenerator');
 var connected = {};
 var mainLobby = {};
 
@@ -6,6 +8,10 @@ exports.live = function(tempIO){
         var name;
 
         socket.on('userName', function(userName){
+            if (userName === ""){
+                var userName = "Guest" + make.key();
+                socket.emit('generated name', userName);
+            }
             if (connected.hasOwnProperty(userName)){
                 socket.emit('userName taken', userName);
             }
@@ -57,7 +63,15 @@ exports.live = function(tempIO){
             tempIO.emit('chat message', name + " logged out.");
             delete mainLobby[name];
             delete connected[name];
-            tempIO.emit('sendUsers', Object.keys(mainLobby));
+            gameModels.removePlayer(name,function(err, game){
+                if (game){
+                    game.quitGame(name);
+                    gameModels.gameUpdate(game, function(err, data){
+                        tempIO.to(data.value.gameKey).emit('get game state', data.value.gameKey);
+                    });
+                }
+                tempIO.emit('sendUsers', Object.keys(mainLobby));
+            });
         });
     });
 }
