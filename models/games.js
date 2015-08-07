@@ -5,6 +5,7 @@ function gameInsert(game, cb){
     cursor.insert(game.shard());
     cb(game);
 }
+// pass query here
 function gameFind(key, cb){
     var cursor = db.collection("games");
     cursor.find({'gameKey':key}).toArray(function(err,docs){
@@ -12,17 +13,18 @@ function gameFind(key, cb){
             cb(err);
         }
         else{
-            var board = docs[0]['board'];
-            var admin = docs[0]['admin'];
-            // Find Better Way
-            game = new WordSearch(docs[0]['admin'],docs[0]['board']);
-            game.gameKey = docs[0]['gameKey'];
-            game.currentTurn = docs[0]['currentTurn'];
-            game.consecutivePasses = docs[0]['consecutivePasses'];
-            game.players = docs[0]['players'];
-            game.foundWords = docs[0]['foundWords'];
-            game.gameStatus = docs[0]['gameStatus'];
-            cb(null, game);
+            cb(null, buildGame(doc[0]));
+        }
+    });
+}
+function removePlayer(name, cb){
+    var cursor = db.collection("games");
+    cursor.find({'players'{$elemMatch: {'nickname':name}}}).toArray(function(err,docs){
+        if(err){
+            cb(err);
+        }
+        else{
+            cb(null, buildGame(doc[0]));
         }
     });
 }
@@ -37,10 +39,25 @@ function gameUpdate(game, cb){
     );
 }
 
+function buildGame(doc){
+    var board = docs['board'];
+    var admin = docs['admin'];
+    // Find Better Way
+    game = new WordSearch(docs['admin'],docs['board']);
+    game.gameKey = docs['gameKey'];
+    game.currentTurn = docs['currentTurn'];
+    game.consecutivePasses = docs['consecutivePasses'];
+    game.players = docs['players'];
+    game.foundWords = docs['foundWords'];
+    game.gameStatus = docs['gameStatus'];
+    return game
+}
+
 function Player(nickname, key){
     this.nickname = nickname;
     this.key = key;
     this.gameKey;
+    this.active = true;
     this.score = 0;
 }
 
@@ -174,24 +191,21 @@ WordSearch.prototype.endGame = function(){
     }else{
         return false;
     }
-    // These Two Conditions can be checked elsewhere
-    // Putting them Here makes it easy to Add more conditions that terminate the game
-    // Making this an object would make the Game more Flexible
 }
-// WordSearch.prototype.quitGame = function(username) {
-    
-//     var index = this.players.indexOf(username);
-//     if(!(~index)) return false;
-    
-//     var removedPlayer = this.players.splice(index, 1);
-    
-//     if (removedPlayer != username){
-//         this.players.splice(index, 0, removedPlayer);
-//         return false;
-//     }else{
-//         return true;
-//     }
-// }
+WordSearch.prototype.quitGame = function(username) {
+    var count = this.players.length;
+    for (var i = 0; i < count; i++){
+        if (username == this.players[i].nickname){
+            // if (this.players[this.currentTurn].nickname == username){
+            //     this.currentTurn += 1;
+            //     this.currentTurn %= this.players.length;
+            // }
+            this.players.splice(index, 1);
+            return true;
+        }
+    }
+    return false;
+}
 
 // -----------------------------------------
 // I need a Prototype that Returns Game State
@@ -306,6 +320,7 @@ module.exports = {
     'gameFind': gameFind,
     'gameInsert': gameInsert,
     'gameUpdate': gameUpdate,
+    'removePlayer': removePlayer,
 };
 
 if(!module.parent){

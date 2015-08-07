@@ -1,6 +1,6 @@
 function mainLobby(nickname){
 	var gameCreationTemplate = $('#createGameFormTemplate').html();
-	$('#createGame').empty()
+	$('#createGame').empty();
 	Mustache.parse(gameCreationTemplate);
 	var rendered = Mustache.render(gameCreationTemplate);
 	$('#createGame').append(rendered);
