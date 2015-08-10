@@ -61,6 +61,7 @@ td.letterCell {
     background-color: #C63D0F;
     min-height: 15em;
     max-height:15em;
+    overflow: scroll;
 }
 .formBox{
     padding: 0;
