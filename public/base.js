@@ -85,24 +85,25 @@ $(document).ready(function(){
 	// Message Sending
 	$('#chat').on('submit', '#gameMessageForm',function(event){
 		event.preventDefault();
-		var message = $(this).children("input[name='gameM']").val();
-		var gameID = $(this).children("input[name='gameID']").val();
+		var message = $("#gameMessageForm input[name='gameM']").val();
+		var gameID = $("#gameMessageForm input[name='gameID']").val();
 		// Message Appended To Submiters Screen
 		var item = $('<li>')
 		item.attr("class","sentMessage");
 		$('#gameMessages').append(item.text("Me: " + message));
 		socket.emit('game message', nickname + ": " + message, gameID);
-		$(this).children("input[name='gameM']").val("");
+		$$("#gameMessageForm input[name='gameM']").val("");
 	});
 	$('#messageForm').on('submit', function(event){
 		event.preventDefault();
-		var message = $(this).children("input[name='mainM']").val();
+		var message = $("#messageForm input[name='mainM']").val();
+		console.log(message);
 		// Message Appended To Submiters Screen
 		var item = $('<li>')
 		item.attr("class","sentMessage");
 		$('#mainMessages').append(item.text("Me: " + message));
 		socket.emit('chat message', nickname + ": " + message);
-		$(this).children("input[name='mainM']").val("");
+		$("#messageForm input[name='mainM']").val("");
 	});
 	// Chat Toggle
 	$('#chatTabs').on('click', 'li',function(event){

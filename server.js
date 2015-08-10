@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 app.use(multer()); // for parsing multipart/form-data
 
 // Connecting to mongoDB
-require("./db").connect('mongodb://localhost:27017/gameServer', function(){
+require("./db").connect('mongodb://localhost:27017/gameServer', function(db){
     // I should probably open and close this as needed
     console.log("Mongo Connected.");
 });
