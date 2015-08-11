@@ -55,6 +55,7 @@ function gameChat(gameID){
 $(document).ready(function(){
 	// User Model
 	var nickname = prompt("Please enter a username:");
+	console.log(nickname);
 	var socket = io();
 	var playerID;
 	socket.emit('userName', nickname);
