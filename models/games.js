@@ -80,6 +80,16 @@ WordSearch.prototype.setup = function(){
     this.board.setup();
     return Object.keys(this.board.letterIndex);
 }
+WordSearch.prototype.view = function(){
+    return {
+        'gameStatus':this.gameStatus,
+        'currentPlayer': this.players[this.currentTurn].nickname,
+        'turnSeq': this.turnSequence(),
+        'wordsDone':this.foundWords,
+        'scores': this.scores(),
+        'grid': this.board.letters
+    }
+}
 WordSearch.prototype.validateBoard = function(searcher, wordList){
     // returns True or False
     var validator = new searcher(this.board);
@@ -130,8 +140,21 @@ WordSearch.prototype.checkGuess = function(playerKey, guess){
 }
 WordSearch.prototype.endTurn = function(){
     if (!this.endGame()){
-        this.currentTurn += 1;
-        this.currentTurn %= this.players.length;
+        this.nextTurn();
+    }
+}
+WordSearch.prototype.nextTurn = function(){
+    // Refactor this
+    var num_of_players = this.players.length, count = 0;
+    while(!this.players[(this.currentTurn+1)%num_of_players].active && count < num_of_players){
+        this.currentTurn++;
+        count++;
+    }
+    if (count == num_of_players){
+        this.gameStatus = "Complete";
+    }
+    else{
+        this.currentTurn = (this.currentTurn+1)%num_of_players;
     }
 }
 WordSearch.prototype.pass = function(){
@@ -187,8 +210,16 @@ WordSearch.prototype.quitGame = function(username) {
     var count = this.players.length;
     for (var i = 0; i < count; i++){
         if (username == this.players[i].nickname){
-            this.players.splice(i, 1);
-            this.currentTurn %= this.players.length;
+            if (this.gameStatus == "Building" || this.gameStatus == "Waiting"){
+                this.players.splice(i, 1);
+                this.currentTurn %= this.players.length;
+            }
+            else{
+                this.players[i].active = false;
+                if (this.currentTurn == i){
+                    this.endTurn(); 
+                }
+            }
             return true;
         }
     }

@@ -16,6 +16,13 @@ body {
 #createGame {
     min-height: 12em;
 }
+.playerList,.form-button{
+    display: inline-block;
+    min-width: 25%;
+}
+.playerList > ol {
+    background-color: #7E8F7C;
+}
 /*Game Interface*/
 
 #grid,#gameData, #gameData > div{

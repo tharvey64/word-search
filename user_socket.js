@@ -3,6 +3,18 @@ var make = require('./lib/idGenerator');
 var connected = {};
 var mainLobby = {};
 
+function playerList(gameKey, cb){
+    gameModels.gameFind(gameKey, function(err, game){
+        if (err){
+            throw err;
+        }
+        else{
+            var ps = game.players.map(function(obj){return obj.nickname;});
+            cb(gameKey,ps);
+        }
+    });
+}
+
 exports.live = function(tempIO){
     tempIO.on('connection', function(socket){
         var name;
@@ -35,6 +47,9 @@ exports.live = function(tempIO){
             delete mainLobby[name];
             // maybe this should be an html string
             tempIO.emit('sendUsers', Object.keys(mainLobby));
+            playerList(gameID, function(key,players){
+                tempIO.to(key).emit('player list', players);
+            });
             socket.to(gameID).emit('game message', name + " Joined Game");
         });
 
@@ -67,7 +82,14 @@ exports.live = function(tempIO){
                 if (game){
                     game.quitGame(name);
                     gameModels.gameUpdate(game, function(err, data){
-                        tempIO.to(data.value.gameKey).emit('get game state', data.value.gameKey);
+                        if (data.value.gameStatus == "Building" || data.value.gameStatus == "Waiting"){
+                            playerList(data.value.gameKey, function(key,players){
+                                tempIO.to(key).emit('player list', players);
+                            });
+                        }
+                        else{
+                            tempIO.to(data.value.gameKey).emit('get game state', data.value.gameKey);
+                        }
                     });
                 }
                 tempIO.emit('sendUsers', Object.keys(mainLobby));
