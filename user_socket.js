@@ -8,10 +8,31 @@ function playerList(gameKey, cb){
         if (err){
             throw err;
         }
-        else{
+        else if (game){
             var ps = game.players.map(function(obj){return obj.nickname;});
             cb(gameKey,ps);
         }
+        else{
+            console.log('Game Not Found')
+        }
+    });
+}
+function playerLeave(name, cb){
+    gameModels.removePlayer(name,function(err, game){
+        if (game){
+            game.quitGame(name);
+            gameModels.gameUpdate(game, function(err, data){
+                if (data.value.gameStatus == "Building" || data.value.gameStatus == "Waiting"){
+                    playerList(data.value.gameKey, function(key,players){
+                        cb(key,'player list', players);
+                    });
+                }
+                else{
+                    cb(data.value.gameKey,'get game state',data.value.gameKey);
+                }
+            });
+        }
+        cb();
     });
 }
 
@@ -20,8 +41,8 @@ exports.live = function(tempIO){
         var name;
 
         socket.on('userName', function(userName){
-            if (userName === ""){
-                var userName = "Guest" + make.key();
+            if (userName === "" || userName == undefined){
+                var userName = "Guest-" + make.key();
                 socket.emit('generated name', userName);
             }
             if (connected.hasOwnProperty(userName)){
@@ -58,11 +79,6 @@ exports.live = function(tempIO){
             // tempIO.to(gameID).emit('game message', "Game Starting");
         });
 
-        socket.on('game over', function(gameID){
-            socket.leave(gameID);
-            mainLobby[name] = socket.id;
-            tempIO.emit('sendUsers', Object.keys(mainLobby));
-        });
 
         socket.on('chat message', function(msg){
             socket.broadcast.emit('chat message', msg);
@@ -73,24 +89,32 @@ exports.live = function(tempIO){
         });
 
         // socket.on('private message', function(msg, somePlayerMarker){});
+        // Change This so That Players Leave
+        socket.on('game over', function(gameID){
+            socket.leave(gameID);
+            mainLobby[name] = socket.id;
+            tempIO.emit('sendUsers', Object.keys(mainLobby));
+        });
+        // Main Lobby Button
+        socket.on('leave game', function(gameID){
+            socket.leave(gameID);
+            mainLobby[name] = socket.id;
+            // tempIO.emit('sendUsers', Object.keys(mainLobby));
+            playerLeave(name, function(){
+                if (arguments.length == 3){
+                    tempIO.to(arguments['0']).emit(arguments['1'],arguments['2']);
+                }
+                tempIO.emit('sendUsers', Object.keys(mainLobby));
+            });
+        });
 
         socket.on('disconnect', function(){
             tempIO.emit('chat message', name + " logged out.");
             delete mainLobby[name];
             delete connected[name];
-            gameModels.removePlayer(name,function(err, game){
-                if (game){
-                    game.quitGame(name);
-                    gameModels.gameUpdate(game, function(err, data){
-                        if (data.value.gameStatus == "Building" || data.value.gameStatus == "Waiting"){
-                            playerList(data.value.gameKey, function(key,players){
-                                tempIO.to(key).emit('player list', players);
-                            });
-                        }
-                        else{
-                            tempIO.to(data.value.gameKey).emit('get game state', data.value.gameKey);
-                        }
-                    });
+            playerLeave(name, function(){
+                if (arguments.length == 3){
+                    tempIO.to(arguments['0']).emit(arguments['1'],arguments['2']);
                 }
                 tempIO.emit('sendUsers', Object.keys(mainLobby));
             });
