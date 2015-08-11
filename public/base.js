@@ -39,6 +39,12 @@ function buildBoard(gameID, playerID, nickname, socket){
 				else{
 					$('#currentTurn').html("It Is Your Turn.");
 				}
+				var mainLobbyButton = $('<p><button id="mainLobbyButton">Main Lobby</button></p>');
+				$('#innerGameData').append(mainLobbyButton);
+				$('#mainLobbyButton').bind('click',function(){
+					socket.emit("leave game", gameID);
+					mainLobby(nickname);
+				});
 			}
 		});
 	});
@@ -178,6 +184,13 @@ $(document).ready(function(){
 				var rendered = Mustache.render(template, data);
 				$('#createGame').html(rendered);
 				$('.form-button').html("Waiting For Game To Start....");
+				// LEAVE TO MAIN LOBBY
+				var mainLobbyButton = $('<p><button id="mainLobbyButton">Main Lobby</button></p>');
+				$('.form-button').append(mainLobbyButton);
+				$('#mainLobbyButton').bind('click',function(){
+					socket.emit("leave game", room);
+					mainLobby(nickname);
+				});
 				// This Will Switch to The Game Chat and Deactivate the join button
 				$('#messages').html("");
 			}

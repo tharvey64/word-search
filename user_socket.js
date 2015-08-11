@@ -24,11 +24,11 @@ function playerLeave(name, cb){
             gameModels.gameUpdate(game, function(err, data){
                 if (data.value.gameStatus == "Building" || data.value.gameStatus == "Waiting"){
                     playerList(data.value.gameKey, function(key,players){
-                        tempIO.to(key).emit('player list', players);
+                        cb(key,'player list', players);
                     });
                 }
                 else{
-                    tempIO.to(data.value.gameKey).emit('get game state', data.value.gameKey);
+                    cb(data.value.gameKey,'get game state',data.value.gameKey);
                 }
             });
         }
@@ -101,6 +101,9 @@ exports.live = function(tempIO){
             mainLobby[name] = socket.id;
             // tempIO.emit('sendUsers', Object.keys(mainLobby));
             playerLeave(name, function(){
+                if (arguments.length == 3){
+                    tempIO.to(arguments['0']).emit(arguments['1'],arguments['2']);
+                }
                 tempIO.emit('sendUsers', Object.keys(mainLobby));
             });
         });
@@ -110,6 +113,9 @@ exports.live = function(tempIO){
             delete mainLobby[name];
             delete connected[name];
             playerLeave(name, function(){
+                if (arguments.length == 3){
+                    tempIO.to(arguments['0']).emit(arguments['1'],arguments['2']);
+                }
                 tempIO.emit('sendUsers', Object.keys(mainLobby));
             });
         });
