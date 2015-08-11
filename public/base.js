@@ -149,6 +149,7 @@ $(document).ready(function(){
 
 	$('#createGame').on('submit', '#createGameForm',function(event){
 		event.preventDefault();
+		$("#btnCreateGame").attr("disabled","disabled");
 		var notifyUsers = $('#userList').val() || [];
 
 		$.post("games/create/",$(this).serialize(), function(data){
