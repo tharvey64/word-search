@@ -97,7 +97,6 @@ $(document).ready(function(){
 	$('#messageForm').on('submit', function(event){
 		event.preventDefault();
 		var message = $("#messageForm input[name='mainM']").val();
-		console.log(message);
 		// Message Appended To Submiters Screen
 		var item = $('<li>')
 		item.attr("class","sentMessage");
@@ -128,6 +127,13 @@ $(document).ready(function(){
 			if(connected[i] != nickname){
 				$('#userList').append($('<option>').text(connected[i]));
 			}
+		}
+	});
+
+	socket.on('player list', function(players){
+		$('.playerList').children('ol').empty();
+		for (i=0;i<players.length;i++){
+			$('.playerList').children('ol').append('<li>'+players[i]+'</li>');
 		}
 	});
 
@@ -165,7 +171,12 @@ $(document).ready(function(){
 				socket.emit('join game', room);
 				// Add Chat Tab
 				gameChat(room);
-				$('#createGame').html("Waiting For Game To Start....");
+				
+				var template = $('#startGameTemplate').html();
+				Mustache.parse(template);
+				var rendered = Mustache.render(template, data);
+				$('#createGame').html(rendered);
+				$('.form-button').html("Waiting For Game To Start....");
 				// This Will Switch to The Game Chat and Deactivate the join button
 				$('#messages').html("");
 			}

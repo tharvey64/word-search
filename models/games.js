@@ -147,7 +147,6 @@ WordSearch.prototype.nextTurn = function(){
     // Refactor this
     var num_of_players = this.players.length, count = 0;
     while(!this.players[(this.currentTurn+1)%num_of_players].active && count < num_of_players){
-        console.log("Loop")
         this.currentTurn++;
         count++;
     }

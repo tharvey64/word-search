@@ -115,11 +115,16 @@
   </script>
 <!-- Move This -->
   <script id="startGameTemplate" type="x-tmpl-mustache">
-    <form id="startGameForm" action="/games/start/{{ gameID }}" method="POST">
-      <input type="hidden" name="playerID" value={{ playerID }}>
-      <input type="hidden" name="gameID" value={{ gameID }}>
-      <input type="submit" value="Start Game">
-    </form>
+    <div class="playerList">
+      <ol></ol>
+    </div>
+    <div class="form-button">
+      <form id="startGameForm" action="/games/start/{{ gameID }}" method="POST">
+        <input type="hidden" name="playerID" value={{ playerID }}>
+        <input type="hidden" name="gameID" value={{ gameID }}>
+        <input type="submit" value="Start Game">
+      </form>
+    </div>
   </script>
   <!-- Remove This -->
   <script id="refreshGameTemplate" type="x-tmpl-mustache">
