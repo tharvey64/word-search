@@ -61,7 +61,6 @@ function gameChat(gameID){
 $(document).ready(function(){
 	// User Model
 	var nickname = prompt("Please enter a username:");
-	console.log(nickname);
 	var socket = io();
 	var playerID;
 	socket.emit('userName', nickname);
@@ -150,6 +149,7 @@ $(document).ready(function(){
 
 	$('#createGame').on('submit', '#createGameForm',function(event){
 		event.preventDefault();
+		$("#btnCreateGame").attr("disabled","disabled");
 		var notifyUsers = $('#userList').val() || [];
 
 		$.post("games/create/",$(this).serialize(), function(data){
